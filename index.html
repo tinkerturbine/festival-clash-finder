@@ -1,1273 +1,1008 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#0f1117" />
-
-  <title>Festival Clash Finder V5 Phone</title>
-
-  <style>
-    :root {
-      --bg: #0f1117;
-      --panel: #151925;
-      --card: #1d2230;
-      --card2: #252b3b;
-      --text: #f4f4f7;
-      --muted: #a8acb8;
-      --border: #34394a;
-      --craig: #3da5ff;
-      --jess: #d46bff;
-      --both: #2ee59d;
-      --danger: #ff5757;
-      --unpicked: #303648;
-      --timecol: 46px;
-      --stagew: 116px;
-      --pxmin: 1.15;
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      overflow-x: hidden;
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: linear-gradient(180deg, #151925 0%, #0f1117 100%);
-      border-bottom: 1px solid var(--border);
-      padding: 9px 8px 8px;
-    }
-
-    h1 {
-      margin: 0 0 4px;
-      font-size: 19px;
-      line-height: 1.1;
-    }
-
-    .subtitle {
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 7px;
-    }
-
-    .tabs {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      margin-bottom: 7px;
-    }
-
-    .tab {
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      padding: 8px 6px;
-      border-radius: 13px;
-      font-size: 13px;
-      font-weight: 900;
-      cursor: pointer;
-    }
-
-    .tab.active {
-      background: var(--both);
-      color: #062015;
-      border-color: var(--both);
-    }
-
-    .top-controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-bottom: 7px;
-    }
-
-    select, button {
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      border-radius: 12px;
-      padding: 8px;
-      font-size: 13px;
-    }
-
-    .chips {
-      display: flex;
-      gap: 7px;
-      overflow-x: auto;
-      padding-bottom: 2px;
-    }
-
-    .chip {
-      white-space: nowrap;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      padding: 7px 9px;
-      border-radius: 999px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .chip.active {
-      background: var(--card2);
-      border-color: var(--both);
-    }
-
-    #syncStatus {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    #syncStatus.ok {
-      color: var(--both);
-    }
-
-    #syncStatus.error {
-      color: var(--danger);
-    }
-
-    main {
-      padding: 8px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    .summary-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 13px;
-      padding: 7px 5px;
-      text-align: center;
-    }
-
-    .summary-number {
-      font-size: 17px;
-      font-weight: 900;
-    }
-
-    .summary-label {
-      color: var(--muted);
-      font-size: 10px;
-      margin-top: 1px;
-    }
-
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-
-    .legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 5px 8px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .dot.none { background: var(--unpicked); }
-    .dot.craig { background: var(--craig); }
-    .dot.jess { background: var(--jess); }
-    .dot.both { background: var(--both); }
-    .dot.clash { background: var(--danger); }
-
-    .clash-box {
-      background: #2a1717;
-      border: 1px solid var(--danger);
-      border-radius: 18px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    .clash-title {
-      font-weight: 900;
-      margin-bottom: 8px;
-    }
-
-    .clash-item {
-      color: #ffd0d0;
-      font-size: 13px;
-      line-height: 1.35;
-      margin: 7px 0;
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: 900;
-      margin: 14px 0 8px;
-    }
-
-    .help-note {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
-      margin: 7px 1px 11px;
-    }
-
-    .vertical-wrap {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      overflow: hidden;
-      margin-bottom: 12px;
-    }
-
-    .vertical-scroll {
-      overflow: auto;
-      max-height: calc(100vh - 225px);
-      min-height: 470px;
-      position: relative;
-      scroll-behavior: smooth;
-    }
-
-    .vertical-timeline {
-      position: relative;
-      min-width: 520px;
-      padding-bottom: 20px;
-    }
-
-    .stage-header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      display: grid;
-      background: #121620;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .corner {
-      position: sticky;
-      left: 0;
-      z-index: 25;
-      background: #121620;
-      border-right: 1px solid var(--border);
-      min-height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 900;
-    }
-
-    .stage-head {
-      min-height: 40px;
-      border-right: 1px solid rgba(255,255,255,0.09);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 7px 5px;
-      font-size: 12px;
-      line-height: 1.15;
-      font-weight: 900;
-      color: var(--text);
-    }
-
-    .grid-area {
-      position: relative;
-      display: grid;
-    }
-
-    .time-grid {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .hour-line {
-      position: absolute;
-      left: 0;
-      right: 0;
-      border-top: 1px solid rgba(255,255,255,0.10);
-    }
-
-    .hour-label {
-      position: sticky;
-      left: 0;
-      width: var(--timecol);
-      transform: translateY(-50%);
-      background: #151925;
-      border-right: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 900;
-      padding: 2px 2px;
-      text-align: center;
-    }
-
-    .stage-column {
-      position: relative;
-      border-right: 1px solid rgba(255,255,255,0.09);
-      min-height: 100%;
-    }
-
-    .stage-column.time-spacer {
-      position: sticky;
-      left: 0;
-      z-index: 12;
-      background: #151925;
-      border-right: 1px solid var(--border);
-    }
-
-    .act-block {
-      position: absolute;
-      left: 4px;
-      right: 4px;
-      border-radius: 10px;
-      background: var(--unpicked);
-      border: 1px solid rgba(255,255,255,0.14);
-      color: var(--text);
-      padding: 5px 5px;
-      overflow: hidden;
-      cursor: pointer;
-      z-index: 5;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.28);
-    }
-
-    .act-block.craig {
-      background: linear-gradient(135deg, rgba(61,165,255,0.96), rgba(24,79,130,0.96));
-      color: white;
-    }
-
-    .act-block.jess {
-      background: linear-gradient(135deg, rgba(212,107,255,0.96), rgba(112,43,145,0.96));
-      color: white;
-    }
-
-    .act-block.both {
-      background: linear-gradient(135deg, rgba(46,229,157,0.96), rgba(18,109,75,0.96));
-      color: #031912;
-    }
-
-    .act-block.clash {
-      outline: 3px solid var(--danger);
-      outline-offset: -2px;
-    }
-
-    .act-title {
-      font-size: 10.5px;
-      font-weight: 950;
-      line-height: 1.1;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .act-time {
-      margin-top: 2px;
-      font-size: 9.5px;
-      color: rgba(255,255,255,0.78);
-      white-space: nowrap;
-    }
-
-    .act-block.both .act-time {
-      color: rgba(0,0,0,0.72);
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 9px;
-      padding-bottom: 40px;
-    }
-
-    .event-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 11px;
-    }
-
-    .event-card.craig { border-left: 5px solid var(--craig); }
-    .event-card.jess { border-left: 5px solid var(--jess); }
-
-    .event-card.both {
-      border-left: 5px solid var(--both);
-      background: #14231d;
-    }
-
-    .event-card.clash {
-      outline: 2px solid var(--danger);
-    }
-
-    .artist {
-      font-size: 17px;
-      font-weight: 900;
-      margin-bottom: 3px;
-    }
-
-    .meta {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
-    }
-
-    .badges {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-
-    .badge {
-      border: 1px solid var(--border);
-      background: var(--card2);
-      border-radius: 999px;
-      padding: 4px 8px;
-      font-size: 12px;
-    }
-
-    .badge-craig { border-color: var(--craig); }
-    .badge-jess { border-color: var(--jess); }
-    .badge-both { border-color: var(--both); }
-    .badge-clash { border-color: var(--danger); }
-
-    .pick-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .pick {
-      font-weight: 900;
-      cursor: pointer;
-    }
-
-    .pick.craig-on {
-      background: var(--craig);
-      color: #04121f;
-      border-color: var(--craig);
-    }
-
-    .pick.jess-on {
-      background: var(--jess);
-      color: #19001f;
-      border-color: var(--jess);
-    }
-
-    .empty {
-      color: var(--muted);
-      text-align: center;
-      padding: 28px 10px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-    }
-
-    .sheet-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.55);
-      z-index: 200;
-      display: none;
-      align-items: flex-end;
-    }
-
-    .sheet {
-      width: 100%;
-      background: #171b26;
-      border-top: 1px solid var(--border);
-      border-radius: 22px 22px 0 0;
-      padding: 16px;
-      box-shadow: 0 -10px 30px rgba(0,0,0,0.4);
-    }
-
-    .sheet-title {
-      font-size: 22px;
-      font-weight: 950;
-      margin-bottom: 4px;
-    }
-
-    .sheet-meta {
-      color: var(--muted);
-      font-size: 14px;
-      margin-bottom: 14px;
-    }
-
-    .sheet-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 9px;
-      margin-bottom: 9px;
-    }
-
-    .sheet-buttons button {
-      font-weight: 950;
-      padding: 13px 10px;
-    }
-
-    .close-btn {
-      width: 100%;
-      margin-top: 4px;
-      background: #2b3142;
-    }
-
-
-    .phone-tip {
-      color: var(--muted);
-      font-size: 11px;
-      margin-top: 5px;
-      line-height: 1.25;
-    }
-
-    @media (max-width: 520px) {
-      h1 {
-        font-size: 18px;
-      }
-
-      .subtitle {
-        display: none;
-      }
-
-      .summary {
-        grid-template-columns: repeat(4, 1fr);
-      }
-
-      .legend {
-        display: none;
-      }
-
-      .section-title {
-        font-size: 15px;
-        margin: 8px 0 4px;
-      }
-
-      .help-note {
-        font-size: 11px;
-        margin: 3px 1px 7px;
-      }
-
-      .clash-box {
-        padding: 9px;
-        border-radius: 14px;
-      }
-
-      .clash-item {
-        font-size: 12px;
-      }
-
-      .vertical-wrap {
-        border-radius: 14px;
-      }
-
-      .stage-head {
-        font-size: 10.5px;
-      }
-
-      .corner {
-        font-size: 10px;
-      }
-
-      .act-title {
-        font-size: 10.5px;
-      }
-
-      .act-time {
-        font-size: 9.5px;
-      }
-
-      #syncStatus {
-        font-size: 11px;
-        margin-top: 6px;
-      }
-    }
-
-    @media (min-width: 800px) {
-      :root {
-        --stagew: 150px;
-      }
-
-      .cards {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .vertical-scroll {
-        max-height: calc(100vh - 220px);
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f1117">
+<title>Festival Group Planner V6</title>
+
+<style>
+:root {
+  --bg:#0f1117;
+  --panel:#151925;
+  --card:#1d2230;
+  --card2:#252b3b;
+  --text:#f4f4f7;
+  --muted:#a8acb8;
+  --border:#34394a;
+  --green:#2ee59d;
+  --blue:#3da5ff;
+  --danger:#ff5757;
+  --unpicked:#303648;
+  --timecol:46px;
+  --stagew:116px;
+}
+
+* {
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+header {
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:linear-gradient(180deg,#151925 0%,#0f1117 100%);
+  border-bottom:1px solid var(--border);
+  padding:9px 8px 8px;
+}
+
+h1 {
+  margin:0 0 5px;
+  font-size:19px;
+}
+
+.small {
+  color:var(--muted);
+  font-size:11px;
+  margin-bottom:6px;
+}
+
+.grid2 {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-bottom:7px;
+}
+
+.tabs {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  margin-bottom:7px;
+}
+
+button,select {
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  border-radius:12px;
+  padding:8px;
+  font-size:13px;
+}
+
+.tab {
+  font-weight:900;
+}
+
+.tab.active {
+  background:var(--green);
+  color:#062015;
+  border-color:var(--green);
+}
+
+.chips {
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  padding-bottom:2px;
+  margin-bottom:6px;
+}
+
+.chip {
+  white-space:nowrap;
+  padding:7px 9px;
+  border-radius:999px;
+  font-size:12px;
+}
+
+.chip.active {
+  background:var(--card2);
+  border-color:var(--green);
+}
+
+#syncStatus {
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+}
+
+#syncStatus.ok { color:var(--green); }
+#syncStatus.error { color:var(--danger); }
+
+main {
+  padding:8px;
+  max-width:1200px;
+  margin:0 auto;
+}
+
+.summary {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+  margin-bottom:8px;
+}
+
+.summary-card {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:7px 5px;
+  text-align:center;
+}
+
+.summary-number {
+  font-size:17px;
+  font-weight:900;
+}
+
+.summary-label {
+  color:var(--muted);
+  font-size:10px;
+}
+
+.section-title {
+  font-size:15px;
+  font-weight:900;
+  margin:8px 0 4px;
+}
+
+.help-note {
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.35;
+  margin:3px 1px 7px;
+}
+
+.timeline-wrap {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.timeline-scroll {
+  overflow:auto;
+  max-height:calc(100vh - 245px);
+  min-height:470px;
+}
+
+.timeline {
+  position:relative;
+  min-width:520px;
+  padding-bottom:20px;
+}
+
+.stage-header {
+  position:sticky;
+  top:0;
+  z-index:20;
+  display:grid;
+  background:#121620;
+  border-bottom:1px solid var(--border);
+}
+
+.corner {
+  position:sticky;
+  left:0;
+  z-index:25;
+  background:#121620;
+  border-right:1px solid var(--border);
+  min-height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+}
+
+.stage-head {
+  min-height:40px;
+  border-right:1px solid rgba(255,255,255,0.09);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:5px 4px;
+  font-size:10.5px;
+  font-weight:900;
+}
+
+.grid-area {
+  position:relative;
+  display:grid;
+}
+
+.time-grid {
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+}
+
+.hour-line {
+  position:absolute;
+  left:0;
+  right:0;
+  border-top:1px solid rgba(255,255,255,0.10);
+}
+
+.hour-label {
+  position:sticky;
+  left:0;
+  width:var(--timecol);
+  transform:translateY(-50%);
+  background:#151925;
+  border-right:1px solid var(--border);
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  padding:2px;
+  text-align:center;
+}
+
+.stage-column {
+  position:relative;
+  border-right:1px solid rgba(255,255,255,0.09);
+}
+
+.stage-column.time-spacer {
+  position:sticky;
+  left:0;
+  z-index:12;
+  background:#151925;
+  border-right:1px solid var(--border);
+}
+
+.act {
+  position:absolute;
+  left:4px;
+  right:4px;
+  border-radius:10px;
+  background:var(--unpicked);
+  border:1px solid rgba(255,255,255,0.14);
+  padding:5px;
+  overflow:hidden;
+  cursor:pointer;
+  z-index:5;
+  box-shadow:0 3px 10px rgba(0,0,0,0.28);
+}
+
+.act.mine {
+  background:linear-gradient(135deg,rgba(61,165,255,.96),rgba(24,79,130,.96));
+}
+
+.act.group {
+  background:linear-gradient(135deg,rgba(46,229,157,.96),rgba(18,109,75,.96));
+  color:#031912;
+}
+
+.act.clash {
+  outline:3px solid var(--danger);
+  outline-offset:-2px;
+}
+
+.act-title {
+  font-size:10.5px;
+  font-weight:950;
+  line-height:1.1;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.act-time {
+  margin-top:2px;
+  font-size:9.5px;
+  color:rgba(255,255,255,.78);
+}
+
+.act.group .act-time,
+.act.group .act-people {
+  color:rgba(0,0,0,.75);
+}
+
+.act-people {
+  margin-top:2px;
+  font-size:9px;
+  color:rgba(255,255,255,.8);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.clash-box {
+  background:#2a1717;
+  border:1px solid var(--danger);
+  border-radius:14px;
+  padding:9px;
+  margin-bottom:10px;
+}
+
+.clash-title {
+  font-weight:900;
+  margin-bottom:7px;
+}
+
+.clash-item {
+  color:#ffd0d0;
+  font-size:12px;
+  line-height:1.35;
+  margin:7px 0;
+}
+
+.panel {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:9px;
+}
+
+.group-row {
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  padding:7px 0;
+}
+
+.group-row:last-child {
+  border-bottom:none;
+}
+
+.group-title {
+  font-weight:900;
+  font-size:13px;
+}
+
+.group-meta {
+  color:var(--muted);
+  font-size:11px;
+  margin-top:2px;
+}
+
+.group-count {
+  color:var(--green);
+  font-weight:950;
+  font-size:13px;
+}
+
+.cards {
+  display:grid;
+  gap:9px;
+  padding-bottom:40px;
+}
+
+.card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:11px;
+}
+
+.card.mine {
+  border-left:5px solid var(--blue);
+}
+
+.card.group {
+  border-left:5px solid var(--green);
+  background:#14231d;
+}
+
+.card.clash {
+  outline:2px solid var(--danger);
+}
+
+.card-title {
+  font-size:17px;
+  font-weight:900;
+}
+
+.card-meta {
+  color:var(--muted);
+  font-size:13px;
+  margin-top:3px;
+}
+
+.badges {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:8px;
+}
+
+.badge {
+  border:1px solid var(--border);
+  background:var(--card2);
+  border-radius:999px;
+  padding:4px 8px;
+  font-size:12px;
+}
+
+.empty {
+  color:var(--muted);
+  text-align:center;
+  padding:28px 10px;
+}
+
+.sheet-bg {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  z-index:200;
+  display:none;
+  align-items:flex-end;
+}
+
+.sheet {
+  width:100%;
+  background:#171b26;
+  border-top:1px solid var(--border);
+  border-radius:22px 22px 0 0;
+  padding:16px;
+}
+
+.sheet-title {
+  font-size:22px;
+  font-weight:950;
+}
+
+.sheet-meta {
+  color:var(--muted);
+  font-size:14px;
+  margin:4px 0 14px;
+}
+
+.sheet button {
+  width:100%;
+  font-weight:950;
+  padding:13px 10px;
+  margin-top:8px;
+}
+
+.mine-on {
+  background:var(--blue);
+  color:#04121f;
+  border-color:var(--blue);
+}
+
+@media (min-width:800px) {
+  :root { --stagew:150px; }
+  .cards { grid-template-columns:repeat(2,1fr); }
+}
+</style>
 </head>
 
 <body>
-  <header>
-    <h1>Festival Clash Finder 🎪</h1>
-    <div class="subtitle">V5: phone-readable planner with shared Craig/Jess cloud sync.</div>
+<header>
+  <h1>Festival Group Planner 🎪</h1>
+  <div class="small">V6 test: private group picker with shared cloud sync.</div>
 
-    <div class="tabs" id="dayTabs"></div>
-
-    <div class="top-controls">
-      <select id="filterSelect">
-        <option value="all">Show all acts</option>
-        <option value="selected">Selected only</option>
-        <option value="craig">Craig picks</option>
-        <option value="jess">Jess picks</option>
-        <option value="both">Both picks</option>
-        <option value="clashes">Clashes only</option>
-      </select>
-
-      <select id="stageSelect">
-        <option value="all">All stages</option>
-      </select>
-    </div>
-
-    <div class="chips">
-      <button class="chip active" id="timelineBtn">Timeline</button>
-      <button class="chip" id="listBtn">List</button>
-      <button class="chip" id="zoomOutBtn">− Zoom</button>
-      <button class="chip" id="zoomInBtn">+ Zoom</button>
-      <button class="chip" id="resetBtn">Reset picks</button>
-    </div>
-
-    <div id="syncStatus">Cloud sync: connecting...</div>
-  </header>
-
-  <main>
-    <section class="summary">
-      <div class="summary-card">
-        <div class="summary-number" id="dayCount">0</div>
-        <div class="summary-label">acts today</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-number" id="craigCount">0</div>
-        <div class="summary-label">Craig</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-number" id="jessCount">0</div>
-        <div class="summary-label">Jess</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-number" id="clashCount">0</div>
-        <div class="summary-label">clashes</div>
-      </div>
-    </section>
-
-    <section class="legend">
-      <span class="legend-item"><span class="dot none"></span> Unpicked</span>
-      <span class="legend-item"><span class="dot craig"></span> Craig</span>
-      <span class="legend-item"><span class="dot jess"></span> Jess</span>
-      <span class="legend-item"><span class="dot both"></span> Both</span>
-      <span class="legend-item"><span class="dot clash"></span> Clash</span>
-    </section>
-
-    <section id="clashSection"></section>
-
-    <section id="timelineView">
-      <div class="section-title">Vertical timeline</div>
-      <div class="help-note">Scroll down through time. Swipe sideways for more stages. Tap an act for Craig/Jess.</div>
-      <div class="vertical-wrap">
-        <div class="vertical-scroll">
-          <div class="vertical-timeline" id="timeline"></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="listView" style="display:none;">
-      <div class="section-title">Act list</div>
-      <div class="cards" id="cards"></div>
-    </section>
-  </main>
-
-  <div class="sheet-backdrop" id="sheetBackdrop" onclick="closeSheetFromBackdrop(event)">
-    <div class="sheet">
-      <div class="sheet-title" id="sheetTitle">Artist</div>
-      <div class="sheet-meta" id="sheetMeta">Time · Stage</div>
-      <div class="sheet-buttons">
-        <button id="sheetCraigBtn">Craig</button>
-        <button id="sheetJessBtn">Jess</button>
-      </div>
-      <button class="close-btn" onclick="closeSheet()">Close</button>
-    </div>
+  <div class="grid2">
+    <select id="festivalSelect">
+      <option value="forbiddenForest">Forbidden Forest</option>
+      <option disabled>Creamfields — next</option>
+      <option disabled>Download — next</option>
+    </select>
+    <select id="personSelect"></select>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import {
-      getFirestore,
-      doc,
-      onSnapshot,
-      setDoc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  <div class="tabs" id="dayTabs"></div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSy-GdewVtIqAuJ6WgpCGcKDUwWiXev6nko",
-      authDomain: "festival-clash-finder.firebaseapp.com",
-      projectId: "festival-clash-finder",
-      storageBucket: "festival-clash-finder.firebasestorage.app",
-      messagingSenderId: "1089096352897",
-      appId: "1:1089096352897:web:2009bf7ea36452ede7980",
-      measurementId: "G-4NZN4062FH"
-    };
+  <div class="grid2">
+    <select id="filterSelect">
+      <option value="all">Show all acts</option>
+      <option value="mine">My picks</option>
+      <option value="group">Group picks</option>
+      <option value="popular">Popular acts</option>
+      <option value="clashes">My clashes</option>
+    </select>
+    <select id="stageSelect">
+      <option value="all">All stages</option>
+    </select>
+  </div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const planRef = doc(db, "festivalPlans", "mainPlan");
+  <div class="chips">
+    <button class="chip active" id="timelineBtn">Timeline</button>
+    <button class="chip" id="listBtn">List</button>
+    <button class="chip" id="groupBtn">Group</button>
+    <button class="chip" id="addPersonBtn">Add person</button>
+    <button class="chip" id="resetBtn">Reset group</button>
+  </div>
 
-    const originalEvents = [{"stage": "Unknown Stage", "day": "Friday 5th June", "start": "14:00", "end": "15:00", "artist": "ARK-S", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "15:00", "end": "16:15", "artist": "Jamback", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "16:15", "end": "17:45", "artist": "Kolter", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "17:45", "end": "19:15", "artist": "Sidney Charles", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "19:15", "end": "21:00", "artist": "Rossi.", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "21:00", "end": "23:00", "artist": "Chris Stussy", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "12:00", "end": "13:15", "artist": "Joe Quinn", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "13:15", "end": "14:30", "artist": "Troxy", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "14:30", "end": "16:30", "artist": "L.P. Rhythm", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "16:30", "end": "18:00", "artist": "Luuk Van Dijk", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "18:00", "end": "20:00", "artist": "Michael Bibi", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "20:00", "end": "21:30", "artist": "Jamie Jones", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "21:30", "end": "23:00", "artist": "Franky Rizardo", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "12:00", "end": "14:00", "artist": "Nath Brown", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "14:00", "end": "15:15", "artist": "Omar+", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "15:15", "end": "16:30", "artist": "Gaskin", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "16:30", "end": "18:00", "artist": "SOSA", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "18:00", "end": "19:30", "artist": "ALISHA", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "19:30", "end": "21:00", "artist": "East End Dubs", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "21:00", "end": "22:55", "artist": "Max Dean b2b Luke Dean", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "14:00", "end": "15:15", "artist": "Joe Hunt", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "15:15", "end": "16:15", "artist": "Skepsis", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "16:15", "end": "17:15", "artist": "Flava D", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "17:15", "end": "18:15", "artist": "A Little Sound", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "18:15", "end": "19:15", "artist": "FMS", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "19:15", "end": "20:30", "artist": "Basslayerz", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "20:30", "end": "21:45", "artist": "SOTA", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "21:45", "end": "23:00", "artist": "Pendulum (DJ Set)", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "12:00", "end": "13:30", "artist": "ADRIANNA", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "13:30", "end": "15:00", "artist": "BK", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "15:00", "end": "16:15", "artist": "Stella Bossi", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "16:15", "end": "17:45", "artist": "Alex Farell", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "17:45", "end": "19:15", "artist": "Restricted", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "19:15", "end": "20:45", "artist": "HOLY PRIEST", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "20:45", "end": "21:45", "artist": "Alt8", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "21:45", "end": "23:00", "artist": "Hannah Laing", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "12:00", "end": "13:30", "artist": "Pipes", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "13:30", "end": "15:00", "artist": "Reallms", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "15:00", "end": "16:30", "artist": "Jaden Thompson", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "16:30", "end": "18:00", "artist": "bullet tooth", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "18:00", "end": "19:30", "artist": "Joe Rolét", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "19:30", "end": "21:00", "artist": "Obskür", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "21:00", "end": "22:55", "artist": "Ewan McVicar", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "15:00", "end": "16:30", "artist": "Jake Fitz", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "16:30", "end": "18:00", "artist": "Emerald", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "18:00", "end": "19:30", "artist": "Oldboy", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "19:30", "end": "21:30", "artist": "Dr Banana", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "21:30", "end": "23:00", "artist": "Phill de Janeiro b2b Benji King", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "12:00", "end": "13:00", "artist": "Emma 2000", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "13:00", "end": "14:15", "artist": "Yesmann", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "14:15", "end": "15:45", "artist": "Joss Dean", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "15:45", "end": "17:00", "artist": "Max Trevett", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "17:00", "end": "19:00", "artist": "GIGSTA", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "19:00", "end": "21:00", "artist": "Tommy Phillips", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "21:00", "end": "23:00", "artist": "Watchers", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "13:00", "end": "14:00", "artist": "The Obsessed", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "14:00", "end": "15:00", "artist": "DJ Jock", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "15:00", "end": "16:00", "artist": "Drunken Kong", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "16:00", "end": "17:30", "artist": "Yellowheads", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "17:30", "end": "19:00", "artist": "Spartaque", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "19:00", "end": "20:30", "artist": "Nicole Moudaber", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "20:30", "end": "22:00", "artist": "Pan-Pot", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "22:00", "end": "22:55", "artist": "ADRIANNA", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "12:30", "end": "14:40", "artist": "Jayfor", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "14:40", "end": "15:50", "artist": "Pola & Bryson", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "15:50", "end": "17:00", "artist": "Lens", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "17:00", "end": "18:10", "artist": "Koven", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "18:10", "end": "19:20", "artist": "Culture Shock", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "19:20", "end": "20:30", "artist": "K Motionz", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "20:30", "end": "21:45", "artist": "Sub Focus", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "21:45", "end": "23:00", "artist": "Hybrid Minds", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "12:00", "end": "14:00", "artist": "Jayfor", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "14:00", "end": "15:15", "artist": "Danny Byrd", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "15:15", "end": "16:15", "artist": "Badger", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "16:15", "end": "17:15", "artist": "Harriet Jaxxon", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "17:15", "end": "18:15", "artist": "Mozey", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "18:15", "end": "19:30", "artist": "Wilkinson", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "19:30", "end": "20:45", "artist": "Bou b2b Hedex", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "20:45", "end": "21:55", "artist": "Andy C", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "21:55", "end": "22:55", "artist": "Kings of the Rollers", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "12:00", "end": "13:30", "artist": "Rue Jay", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "13:30", "end": "15:00", "artist": "Jess Bays", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "15:00", "end": "16:30", "artist": "Low Steppa", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "16:30", "end": "18:00", "artist": "D.O.D", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "18:00", "end": "19:30", "artist": "TeeDee", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "19:30", "end": "21:15", "artist": "Morgan Seatree", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "21:15", "end": "23:00", "artist": "MK", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "12:00", "end": "14:30", "artist": "George Kafetzis", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "14:30", "end": "16:00", "artist": "Hitty", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "16:00", "end": "17:30", "artist": "Sammy Porter b2b George Mensah", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "17:30", "end": "19:30", "artist": "Patrick Topping", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "19:30", "end": "20:55", "artist": "Tita Lau", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "20:55", "end": "22:55", "artist": "James Hype", "craig": true, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "12:00", "end": "13:45", "artist": "Samantha Neal", "craig": false, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "13:45", "end": "15:15", "artist": "Nathan Dawe", "craig": false, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "15:15", "end": "16:30", "artist": "Girls Don't Sync", "craig": false, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "16:30", "end": "17:45", "artist": "Shy FX", "craig": true, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "17:45", "end": "19:00", "artist": "DJ EZ", "craig": true, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "19:00", "end": "21:00", "artist": "Silva Bumpa", "craig": false, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "21:00", "end": "22:30", "artist": "MPH", "craig": false, "jess": false}];
+  <div id="syncStatus">Cloud sync: connecting...</div>
+</header>
 
-    let events = originalEvents.map((event, index) => ({
-      ...event,
-      id: index
-    }));
+<main>
+  <section class="summary">
+    <div class="summary-card"><div class="summary-number" id="dayCount">0</div><div class="summary-label">acts today</div></div>
+    <div class="summary-card"><div class="summary-number" id="mineCount">0</div><div class="summary-label">my picks</div></div>
+    <div class="summary-card"><div class="summary-number" id="groupCount">0</div><div class="summary-label">group picks</div></div>
+    <div class="summary-card"><div class="summary-number" id="clashCount">0</div><div class="summary-label">my clashes</div></div>
+  </section>
 
+  <section id="clashSection"></section>
 
-    let activeDay = [...new Set(events.map(e => e.day))][0];
-    let viewMode = "timeline";
-    let pxPerMinute = 1.15;
-    let selectedEventId = null;
+  <section id="timelineView">
+    <div class="section-title">Timeline</div>
+    <div class="help-note">Choose your name, then tap acts. Swipe sideways for stages.</div>
+    <div class="timeline-wrap"><div class="timeline-scroll"><div class="timeline" id="timeline"></div></div></div>
+  </section>
 
-    const dayTabs = document.getElementById("dayTabs");
-    const filterSelect = document.getElementById("filterSelect");
-    const stageSelect = document.getElementById("stageSelect");
-    const timelineEl = document.getElementById("timeline");
-    const cardsEl = document.getElementById("cards");
-    const clashSection = document.getElementById("clashSection");
-    const sheetBackdrop = document.getElementById("sheetBackdrop");
-    const sheetTitle = document.getElementById("sheetTitle");
-    const sheetMeta = document.getElementById("sheetMeta");
-    const sheetCraigBtn = document.getElementById("sheetCraigBtn");
-    const sheetJessBtn = document.getElementById("sheetJessBtn");
-    const syncStatus = document.getElementById("syncStatus");
+  <section id="listView" style="display:none;">
+    <div class="section-title">Act list</div>
+    <div class="cards" id="cards"></div>
+  </section>
 
-    const days = [...new Set(events.map(e => e.day))];
+  <section id="groupView" style="display:none;">
+    <div class="section-title">Group view</div>
+    <div class="help-note">Most wanted acts across the group.</div>
+    <div class="panel" id="groupList"></div>
+  </section>
+</main>
 
-    function toMinutes(time) {
-      const [h, m] = time.split(":").map(Number);
-      return h * 60 + m;
+<div class="sheet-bg" id="sheetBg" onclick="closeSheetFromBackdrop(event)">
+  <div class="sheet">
+    <div class="sheet-title" id="sheetTitle">Artist</div>
+    <div class="sheet-meta" id="sheetMeta">Time · Stage</div>
+    <button id="pickBtn">I want this</button>
+    <div class="help-note" id="peopleText">Nobody picked this yet.</div>
+    <button onclick="closeSheet()">Close</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getFirestore, doc, onSnapshot, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSy-GdewVtIqAuJ6WgpCGcKDUwWiXev6nko",
+  authDomain: "festival-clash-finder.firebaseapp.com",
+  projectId: "festival-clash-finder",
+  storageBucket: "festival-clash-finder.firebasestorage.app",
+  messagingSenderId: "1089096352897",
+  appId: "1:1089096352897:web:2009bf7ea36452ede7980",
+  measurementId: "G-4NZN4062FH"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const groupRef = doc(db, "festivalPlans", "groupPlannerV6");
+
+const events = [{"stage": "Unknown Stage", "day": "Friday 5th June", "start": "14:00", "end": "15:00", "artist": "ARK-S"}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "15:00", "end": "16:15", "artist": "Jamback"}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "16:15", "end": "17:45", "artist": "Kolter"}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "17:45", "end": "19:15", "artist": "Sidney Charles"}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "19:15", "end": "21:00", "artist": "Rossi."}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "21:00", "end": "23:00", "artist": "Chris Stussy"}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "12:00", "end": "13:15", "artist": "Joe Quinn"}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "13:15", "end": "14:30", "artist": "Troxy"}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "14:30", "end": "16:30", "artist": "L.P. Rhythm"}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "16:30", "end": "18:00", "artist": "Luuk Van Dijk"}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "18:00", "end": "20:00", "artist": "Michael Bibi"}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "20:00", "end": "21:30", "artist": "Jamie Jones"}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "21:30", "end": "23:00", "artist": "Franky Rizardo"}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "12:00", "end": "14:00", "artist": "Nath Brown"}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "14:00", "end": "15:15", "artist": "Omar+"}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "15:15", "end": "16:30", "artist": "Gaskin"}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "16:30", "end": "18:00", "artist": "SOSA"}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "18:00", "end": "19:30", "artist": "ALISHA"}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "19:30", "end": "21:00", "artist": "East End Dubs"}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "21:00", "end": "22:55", "artist": "Max Dean b2b Luke Dean"}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "14:00", "end": "15:15", "artist": "Joe Hunt"}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "15:15", "end": "16:15", "artist": "Skepsis"}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "16:15", "end": "17:15", "artist": "Flava D"}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "17:15", "end": "18:15", "artist": "A Little Sound"}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "18:15", "end": "19:15", "artist": "FMS"}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "19:15", "end": "20:30", "artist": "Basslayerz"}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "20:30", "end": "21:45", "artist": "SOTA"}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "21:45", "end": "23:00", "artist": "Pendulum (DJ Set)"}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "12:00", "end": "13:30", "artist": "ADRIANNA"}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "13:30", "end": "15:00", "artist": "BK"}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "15:00", "end": "16:15", "artist": "Stella Bossi"}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "16:15", "end": "17:45", "artist": "Alex Farell"}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "17:45", "end": "19:15", "artist": "Restricted"}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "19:15", "end": "20:45", "artist": "HOLY PRIEST"}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "20:45", "end": "21:45", "artist": "Alt8"}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "21:45", "end": "23:00", "artist": "Hannah Laing"}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "12:00", "end": "13:30", "artist": "Pipes"}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "13:30", "end": "15:00", "artist": "Reallms"}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "15:00", "end": "16:30", "artist": "Jaden Thompson"}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "16:30", "end": "18:00", "artist": "bullet tooth"}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "18:00", "end": "19:30", "artist": "Joe Rolét"}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "19:30", "end": "21:00", "artist": "Obskür"}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "21:00", "end": "22:55", "artist": "Ewan McVicar"}, {"stage": "Sola", "day": "Friday 5th June", "start": "15:00", "end": "16:30", "artist": "Jake Fitz"}, {"stage": "Sola", "day": "Friday 5th June", "start": "16:30", "end": "18:00", "artist": "Emerald"}, {"stage": "Sola", "day": "Friday 5th June", "start": "18:00", "end": "19:30", "artist": "Oldboy"}, {"stage": "Sola", "day": "Friday 5th June", "start": "19:30", "end": "21:30", "artist": "Dr Banana"}, {"stage": "Sola", "day": "Friday 5th June", "start": "21:30", "end": "23:00", "artist": "Phill de Janeiro b2b Benji King"}, {"stage": "Sola", "day": "Saturday 6th June", "start": "12:00", "end": "13:00", "artist": "Emma 2000"}, {"stage": "Sola", "day": "Saturday 6th June", "start": "13:00", "end": "14:15", "artist": "Yesmann"}, {"stage": "Sola", "day": "Saturday 6th June", "start": "14:15", "end": "15:45", "artist": "Joss Dean"}, {"stage": "Sola", "day": "Saturday 6th June", "start": "15:45", "end": "17:00", "artist": "Max Trevett"}, {"stage": "Sola", "day": "Saturday 6th June", "start": "17:00", "end": "19:00", "artist": "GIGSTA"}, {"stage": "Sola", "day": "Saturday 6th June", "start": "19:00", "end": "21:00", "artist": "Tommy Phillips"}, {"stage": "Sola", "day": "Saturday 6th June", "start": "21:00", "end": "23:00", "artist": "Watchers"}, {"stage": "Sola", "day": "Sunday 7th June", "start": "13:00", "end": "14:00", "artist": "The Obsessed"}, {"stage": "Sola", "day": "Sunday 7th June", "start": "14:00", "end": "15:00", "artist": "DJ Jock"}, {"stage": "Sola", "day": "Sunday 7th June", "start": "15:00", "end": "16:00", "artist": "Drunken Kong"}, {"stage": "Sola", "day": "Sunday 7th June", "start": "16:00", "end": "17:30", "artist": "Yellowheads"}, {"stage": "Sola", "day": "Sunday 7th June", "start": "17:30", "end": "19:00", "artist": "Spartaque"}, {"stage": "Sola", "day": "Sunday 7th June", "start": "19:00", "end": "20:30", "artist": "Nicole Moudaber"}, {"stage": "Sola", "day": "Sunday 7th June", "start": "20:30", "end": "22:00", "artist": "Pan-Pot"}, {"stage": "Sola", "day": "Sunday 7th June", "start": "22:00", "end": "22:55", "artist": "ADRIANNA"}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "12:30", "end": "14:40", "artist": "Jayfor"}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "14:40", "end": "15:50", "artist": "Pola & Bryson"}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "15:50", "end": "17:00", "artist": "Lens"}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "17:00", "end": "18:10", "artist": "Koven"}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "18:10", "end": "19:20", "artist": "Culture Shock"}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "19:20", "end": "20:30", "artist": "K Motionz"}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "20:30", "end": "21:45", "artist": "Sub Focus"}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "21:45", "end": "23:00", "artist": "Hybrid Minds"}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "12:00", "end": "14:00", "artist": "Jayfor"}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "14:00", "end": "15:15", "artist": "Danny Byrd"}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "15:15", "end": "16:15", "artist": "Badger"}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "16:15", "end": "17:15", "artist": "Harriet Jaxxon"}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "17:15", "end": "18:15", "artist": "Mozey"}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "18:15", "end": "19:30", "artist": "Wilkinson"}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "19:30", "end": "20:45", "artist": "Bou b2b Hedex"}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "20:45", "end": "21:55", "artist": "Andy C"}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "21:55", "end": "22:55", "artist": "Kings of the Rollers"}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "12:00", "end": "13:30", "artist": "Rue Jay"}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "13:30", "end": "15:00", "artist": "Jess Bays"}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "15:00", "end": "16:30", "artist": "Low Steppa"}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "16:30", "end": "18:00", "artist": "D.O.D"}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "18:00", "end": "19:30", "artist": "TeeDee"}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "19:30", "end": "21:15", "artist": "Morgan Seatree"}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "21:15", "end": "23:00", "artist": "MK"}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "12:00", "end": "14:30", "artist": "George Kafetzis"}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "14:30", "end": "16:00", "artist": "Hitty"}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "16:00", "end": "17:30", "artist": "Sammy Porter b2b George Mensah"}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "17:30", "end": "19:30", "artist": "Patrick Topping"}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "19:30", "end": "20:55", "artist": "Tita Lau"}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "20:55", "end": "22:55", "artist": "James Hype"}, {"stage": "Hive", "day": "Saturday 6th June", "start": "12:00", "end": "13:45", "artist": "Samantha Neal"}, {"stage": "Hive", "day": "Saturday 6th June", "start": "13:45", "end": "15:15", "artist": "Nathan Dawe"}, {"stage": "Hive", "day": "Saturday 6th June", "start": "15:15", "end": "16:30", "artist": "Girls Don't Sync"}, {"stage": "Hive", "day": "Saturday 6th June", "start": "16:30", "end": "17:45", "artist": "Shy FX"}, {"stage": "Hive", "day": "Saturday 6th June", "start": "17:45", "end": "19:00", "artist": "DJ EZ"}, {"stage": "Hive", "day": "Saturday 6th June", "start": "19:00", "end": "21:00", "artist": "Silva Bumpa"}, {"stage": "Hive", "day": "Saturday 6th June", "start": "21:00", "end": "22:30", "artist": "MPH"}].map((e,i) => ({...e, id:i}));
+
+let people = ["Craig", "Jess"];
+let picksByPerson = {};
+let activePerson = localStorage.getItem("activeFestivalPerson") || "Craig";
+let activeDay = [...new Set(events.map(e => e.day))][0];
+let viewMode = "timeline";
+let selectedEventId = null;
+let pxPerMinute = 1.15;
+
+const personSelect = document.getElementById("personSelect");
+const dayTabs = document.getElementById("dayTabs");
+const filterSelect = document.getElementById("filterSelect");
+const stageSelect = document.getElementById("stageSelect");
+const syncStatus = document.getElementById("syncStatus");
+const timelineEl = document.getElementById("timeline");
+const cardsEl = document.getElementById("cards");
+const groupList = document.getElementById("groupList");
+const clashSection = document.getElementById("clashSection");
+const sheetBg = document.getElementById("sheetBg");
+const sheetTitle = document.getElementById("sheetTitle");
+const sheetMeta = document.getElementById("sheetMeta");
+const pickBtn = document.getElementById("pickBtn");
+const peopleText = document.getElementById("peopleText");
+
+function setSyncStatus(msg, state="") {
+  syncStatus.textContent = msg;
+  syncStatus.className = state;
+}
+
+function key(name) {
+  return name.trim().replace(/[.#$/\[\]]/g, "_");
+}
+
+function toMinutes(time) {
+  const [h,m] = time.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function minuteLabel(mins) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0");
+}
+
+function shortDay(day) {
+  if (day.toLowerCase().includes("friday")) return "Friday";
+  if (day.toLowerCase().includes("saturday")) return "Saturday";
+  if (day.toLowerCase().includes("sunday")) return "Sunday";
+  return day;
+}
+
+function getPicks(person=activePerson) {
+  return picksByPerson[key(person)] || {};
+}
+
+function picked(eventId, person=activePerson) {
+  return Boolean(getPicks(person)[String(eventId)]);
+}
+
+function peopleFor(eventId) {
+  return people.filter(p => picked(eventId, p));
+}
+
+function groupPicked(eventId) {
+  return peopleFor(eventId).length > 0;
+}
+
+function overlaps(a,b) {
+  return a.day === b.day && toMinutes(a.start) < toMinutes(b.end) && toMinutes(b.start) < toMinutes(a.end);
+}
+
+function myClashes() {
+  const selected = events.filter(e => picked(e.id));
+  const clashes = [];
+  for (let i=0; i<selected.length; i++) {
+    for (let j=i+1; j<selected.length; j++) {
+      if (overlaps(selected[i], selected[j])) clashes.push([selected[i], selected[j]]);
     }
+  }
+  return clashes;
+}
 
-    function minuteLabel(mins) {
-      const h = Math.floor(mins / 60);
-      const m = mins % 60;
-      return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+function hasClash(event, clashes) {
+  return clashes.some(([a,b]) => a.id === event.id || b.id === event.id);
+}
+
+async function seedCloud() {
+  const seed = {
+    Craig: {},
+    Jess: {}
+  };
+  await setDoc(groupRef, {
+    initialized:true,
+    updatedAt:serverTimestamp(),
+    people:["Craig","Jess"],
+    picksByPerson:seed
+  }, {merge:true});
+}
+
+async function saveCloud() {
+  try {
+    setSyncStatus("Cloud sync: saving...");
+    await setDoc(groupRef, {
+      initialized:true,
+      updatedAt:serverTimestamp(),
+      people,
+      picksByPerson
+    }, {merge:true});
+    setSyncStatus("Cloud sync: live ✓", "ok");
+  } catch(err) {
+    console.error(err);
+    setSyncStatus("Cloud sync error: " + err.message, "error");
+  }
+}
+
+onSnapshot(groupRef, async snap => {
+  try {
+    if (!snap.exists()) {
+      await seedCloud();
+      return;
     }
-
-    function overlaps(a, b) {
-      if (a.day !== b.day) return false;
-      return toMinutes(a.start) < toMinutes(b.end) && toMinutes(b.start) < toMinutes(a.end);
-    }
-
-    function selectedBySamePerson(a, b) {
-      return (a.craig && b.craig) || (a.jess && b.jess);
-    }
-
-    function getAllClashes() {
-      const clashes = [];
-      const selected = events.filter(e => e.craig || e.jess);
-
-      for (let i = 0; i < selected.length; i++) {
-        for (let j = i + 1; j < selected.length; j++) {
-          const a = selected[i];
-          const b = selected[j];
-
-          if (overlaps(a, b) && selectedBySamePerson(a, b)) {
-            clashes.push([a, b]);
-          }
-        }
-      }
-
-      return clashes;
-    }
-
-    function getVisibleEvents() {
-      const filter = filterSelect.value;
-      const selectedStage = stageSelect.value;
-      const clashes = getAllClashes();
-      const clashIds = new Set(clashes.flat().map(e => e.id));
-
-      let list = events.filter(e => e.day === activeDay);
-
-      if (selectedStage !== "all") list = list.filter(e => e.stage === selectedStage);
-      if (filter === "selected") list = list.filter(e => e.craig || e.jess);
-      if (filter === "craig") list = list.filter(e => e.craig);
-      if (filter === "jess") list = list.filter(e => e.jess);
-      if (filter === "both") list = list.filter(e => e.craig && e.jess);
-      if (filter === "clashes") list = list.filter(e => clashIds.has(e.id));
-
-      return list;
-    }
-
-    function eventHasClash(event, clashes) {
-      return clashes.some(([a, b]) => a.id === event.id || b.id === event.id);
-    }
-
-    function setSyncStatus(message, state = "") {
-      syncStatus.textContent = message;
-      syncStatus.className = state;
-    }
-
-    function getInitialPicks() {
-      const picks = {};
-
-      originalEvents.forEach((event, index) => {
-        if (event.craig || event.jess) {
-          picks[String(index)] = {
-            craig: Boolean(event.craig),
-            jess: Boolean(event.jess)
-          };
-        }
-      });
-
-      return picks;
-    }
-
-    function applyCloudPicks(picks = {}) {
-      events = originalEvents.map((event, index) => {
-        const pick = picks[String(index)] || {};
-        return {
-          ...event,
-          id: index,
-          craig: Boolean(pick.craig),
-          jess: Boolean(pick.jess)
-        };
-      });
-    }
-
-    async function seedInitialPicks() {
-      setSyncStatus("Cloud sync: setting up first shared plan...");
-      await setDoc(planRef, {
-        initialized: true,
-        updatedAt: serverTimestamp(),
-        picks: getInitialPicks()
-      }, { merge: true });
-    }
-
-    async function saveEventPick(event) {
-      try {
-        setSyncStatus("Cloud sync: saving...");
-        await setDoc(planRef, {
-          initialized: true,
-          updatedAt: serverTimestamp(),
-          picks: {
-            [String(event.id)]: {
-              craig: Boolean(event.craig),
-              jess: Boolean(event.jess)
-            }
-          }
-        }, { merge: true });
-        setSyncStatus("Cloud sync: live ✓", "ok");
-      } catch (error) {
-        console.error(error);
-        setSyncStatus("Cloud sync error: " + error.message, "error");
-      }
-    }
-
-    async function resetCloudPicks() {
-      try {
-        setSyncStatus("Cloud sync: resetting...");
-        await setDoc(planRef, {
-          initialized: true,
-          updatedAt: serverTimestamp(),
-          picks: {}
-        });
-        setSyncStatus("Cloud sync: reset ✓", "ok");
-      } catch (error) {
-        console.error(error);
-        setSyncStatus("Cloud sync error: " + error.message, "error");
-      }
-    }
-
-    onSnapshot(planRef, async (snapshot) => {
-      try {
-        if (!snapshot.exists()) {
-          await seedInitialPicks();
-          return;
-        }
-
-        const data = snapshot.data() || {};
-        const picks = data.picks || {};
-        const hasPicks = Object.keys(picks).length > 0;
-
-        if (!data.initialized && !hasPicks) {
-          await seedInitialPicks();
-          return;
-        }
-
-        applyCloudPicks(picks);
-        buildTabs();
-        buildStageFilter();
-        render();
-        setSyncStatus("Cloud sync: live ✓", "ok");
-      } catch (error) {
-        console.error(error);
-        setSyncStatus("Cloud sync error: " + error.message, "error");
-      }
-    }, (error) => {
-      console.error(error);
-      setSyncStatus("Cloud sync error: " + error.message, "error");
-    });
-
-    function buildTabs() {
-      dayTabs.innerHTML = "";
-
-      days.forEach(day => {
-        const button = document.createElement("button");
-        button.className = "tab" + (day === activeDay ? " active" : "");
-        button.textContent = shortDay(day);
-        button.onclick = () => {
-          activeDay = day;
-          buildTabs();
-          buildStageFilter();
-          render();
-        };
-        dayTabs.appendChild(button);
-      });
-    }
-
-    function shortDay(day) {
-      if (day.toLowerCase().includes("friday")) return "Friday";
-      if (day.toLowerCase().includes("saturday")) return "Saturday";
-      if (day.toLowerCase().includes("sunday")) return "Sunday";
-      return day;
-    }
-
-    function buildStageFilter() {
-      const current = stageSelect.value;
-      const stages = [...new Set(events.filter(e => e.day === activeDay).map(e => e.stage))];
-
-      stageSelect.innerHTML = '<option value="all">All stages</option>';
-
-      stages.forEach(stage => {
-        const option = document.createElement("option");
-        option.value = stage;
-        option.textContent = stage;
-        stageSelect.appendChild(option);
-      });
-
-      stageSelect.value = stages.includes(current) ? current : "all";
-    }
-
-    function pickClass(event, clashes) {
-      let classes = "";
-      if (event.craig && event.jess) classes += " both";
-      else if (event.craig) classes += " craig";
-      else if (event.jess) classes += " jess";
-      if (eventHasClash(event, clashes)) classes += " clash";
-      return classes;
-    }
-
-    function renderSummary(dayEvents, dayClashes) {
-      document.getElementById("dayCount").textContent = dayEvents.length;
-      document.getElementById("craigCount").textContent = dayEvents.filter(e => e.craig).length;
-      document.getElementById("jessCount").textContent = dayEvents.filter(e => e.jess).length;
-      document.getElementById("clashCount").textContent = dayClashes.length;
-    }
-
-    function renderClashes(dayClashes) {
-      if (dayClashes.length === 0) {
-        clashSection.innerHTML = "";
-        return;
-      }
-
-      let markup = `<div class="clash-box">
-        <div class="clash-title">⚠️ Clashes on ${escapeHtml(shortDay(activeDay))}</div>`;
-
-      dayClashes.forEach(([a, b]) => {
-        const people = [];
-        if (a.craig && b.craig) people.push("Craig");
-        if (a.jess && b.jess) people.push("Jess");
-
-        markup += `<div class="clash-item">
-          <strong>${people.join(" & ")}</strong>: 
-          ${escapeHtml(a.artist)} ${a.start}-${a.end} at ${escapeHtml(a.stage)}
-          overlaps with
-          ${escapeHtml(b.artist)} ${b.start}-${b.end} at ${escapeHtml(b.stage)}.
-        </div>`;
-      });
-
-      markup += `</div>`;
-      clashSection.innerHTML = markup;
-    }
-
-    function renderTimeline(list, clashes) {
-      if (list.length === 0) {
-        timelineEl.innerHTML = `<div class="empty">No acts to show for this filter.</div>`;
-        return;
-      }
-
-      const dayEvents = events.filter(e => e.day === activeDay);
-      const minTime = Math.floor(Math.min(...dayEvents.map(e => toMinutes(e.start))) / 60) * 60;
-      const maxTime = Math.ceil(Math.max(...dayEvents.map(e => toMinutes(e.end))) / 60) * 60;
-      const totalMinutes = maxTime - minTime;
-      const totalHeight = Math.max(420, totalMinutes * pxPerMinute);
-
-      const selectedStage = stageSelect.value;
-      const stages = selectedStage === "all"
-        ? [...new Set(dayEvents.map(e => e.stage))]
-        : [selectedStage];
-
-      const colCount = stages.length + 1;
-      const gridTemplate = `var(--timecol) repeat(${stages.length}, var(--stagew))`;
-
-      let markup = `
-        <div class="stage-header" style="grid-template-columns:${gridTemplate};">
-          <div class="corner">TIME</div>
-          ${stages.map(stage => `<div class="stage-head">${escapeHtml(stage)}</div>`).join("")}
-        </div>
-
-        <div class="grid-area" style="grid-template-columns:${gridTemplate}; height:${totalHeight}px;">
-          <div class="time-grid">`;
-
-      for (let t = minTime; t <= maxTime; t += 60) {
-        const top = (t - minTime) * pxPerMinute;
-        markup += `
-          <div class="hour-line" style="top:${top}px;">
-            <div class="hour-label">${minuteLabel(t)}</div>
-          </div>`;
-      }
-
-      markup += `</div>
-          <div class="stage-column time-spacer"></div>`;
-
-      stages.forEach(stage => {
-        markup += `<div class="stage-column">`;
-
-        list
-          .filter(e => e.stage === stage)
-          .sort((a, b) => toMinutes(a.start) - toMinutes(b.start))
-          .forEach(event => {
-            const top = (toMinutes(event.start) - minTime) * pxPerMinute + 3;
-            const height = Math.max(38, (toMinutes(event.end) - toMinutes(event.start)) * pxPerMinute - 6);
-
-            markup += `
-              <div class="act-block${pickClass(event, clashes)}"
-                style="top:${top}px; height:${height}px;"
-                onclick="openSheet(${event.id})">
-                <div class="act-title">${escapeHtml(event.artist)}</div>
-                <div class="act-time">${event.start}-${event.end}</div>
-              </div>`;
-          });
-
-        markup += `</div>`;
-      });
-
-      markup += `</div>`;
-      timelineEl.innerHTML = markup;
-    }
-
-    function renderCards(list, clashes) {
-      if (list.length === 0) {
-        cardsEl.innerHTML = `<div class="empty">No acts to show for this filter.</div>`;
-        return;
-      }
-
-      list.sort((a, b) => toMinutes(a.start) - toMinutes(b.start));
-
-      let markup = "";
-
-      list.forEach(event => {
-        const isBoth = event.craig && event.jess;
-        const isClash = eventHasClash(event, clashes);
-
-        let classes = "event-card";
-        if (isBoth) classes += " both";
-        else if (event.craig) classes += " craig";
-        else if (event.jess) classes += " jess";
-        if (isClash) classes += " clash";
-
-        markup += `<div class="${classes}">
-          <div class="artist">${escapeHtml(event.artist)}</div>
-          <div class="meta">${event.start} - ${event.end} · ${escapeHtml(event.stage)}</div>
-
-          <div class="badges">
-            ${event.craig ? '<span class="badge badge-craig">Craig</span>' : ''}
-            ${event.jess ? '<span class="badge badge-jess">Jess</span>' : ''}
-            ${isBoth ? '<span class="badge badge-both">Both want this</span>' : ''}
-            ${isClash ? '<span class="badge badge-clash">Clash</span>' : ''}
-          </div>
-
-          <div class="pick-buttons">
-            <button class="pick ${event.craig ? 'craig-on' : ''}" onclick="togglePick(${event.id}, 'craig')">
-              ${event.craig ? '✓ Craig' : 'Craig'}
-            </button>
-            <button class="pick ${event.jess ? 'jess-on' : ''}" onclick="togglePick(${event.id}, 'jess')">
-              ${event.jess ? '✓ Jess' : 'Jess'}
-            </button>
-          </div>
-        </div>`;
-      });
-
-      cardsEl.innerHTML = markup;
-    }
-
-    function render() {
-      const allClashes = getAllClashes();
-      const dayClashes = allClashes.filter(([a, b]) => a.day === activeDay || b.day === activeDay);
-      const dayEvents = events.filter(e => e.day === activeDay);
-      const visibleEvents = getVisibleEvents();
-
-      renderSummary(dayEvents, dayClashes);
-      renderClashes(dayClashes);
-      renderTimeline(visibleEvents, allClashes);
-      renderCards(visibleEvents, allClashes);
-
-      document.getElementById("timelineView").style.display = viewMode === "timeline" ? "block" : "none";
-      document.getElementById("listView").style.display = viewMode === "list" ? "block" : "none";
-    }
-
-    function openSheet(id) {
-      selectedEventId = id;
-      const event = events.find(e => e.id === id);
-
-      sheetTitle.textContent = event.artist;
-      sheetMeta.textContent = `${event.start}-${event.end} · ${event.stage}`;
-
-      updateSheetButtons(event);
-      sheetBackdrop.style.display = "flex";
-    }
-
-    function updateSheetButtons(event) {
-      sheetCraigBtn.textContent = event.craig ? "✓ Craig wants this" : "Craig wants this";
-      sheetJessBtn.textContent = event.jess ? "✓ Jess wants this" : "Jess wants this";
-
-      sheetCraigBtn.className = event.craig ? "craig-on" : "";
-      sheetJessBtn.className = event.jess ? "jess-on" : "";
-
-      if (event.craig) {
-        sheetCraigBtn.style.background = "var(--craig)";
-        sheetCraigBtn.style.color = "#04121f";
-      } else {
-        sheetCraigBtn.style.background = "var(--card)";
-        sheetCraigBtn.style.color = "var(--text)";
-      }
-
-      if (event.jess) {
-        sheetJessBtn.style.background = "var(--jess)";
-        sheetJessBtn.style.color = "#19001f";
-      } else {
-        sheetJessBtn.style.background = "var(--card)";
-        sheetJessBtn.style.color = "var(--text)";
-      }
-    }
-
-    sheetCraigBtn.addEventListener("click", () => {
-      if (selectedEventId === null) return;
-      const event = events.find(e => e.id === selectedEventId);
-      event.craig = !event.craig;
-      saveEventPick(event);
-      updateSheetButtons(event);
-      render();
-    });
-
-    sheetJessBtn.addEventListener("click", () => {
-      if (selectedEventId === null) return;
-      const event = events.find(e => e.id === selectedEventId);
-      event.jess = !event.jess;
-      saveEventPick(event);
-      updateSheetButtons(event);
-      render();
-    });
-
-    function closeSheet() {
-      sheetBackdrop.style.display = "none";
-      selectedEventId = null;
-    }
-
-    function closeSheetFromBackdrop(event) {
-      if (event.target === sheetBackdrop) closeSheet();
-    }
-
-    function togglePick(id, person) {
-      const event = events.find(e => e.id === id);
-      event[person] = !event[person];
-      saveEventPick(event);
-      render();
-    }
-
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    document.getElementById("timelineBtn").addEventListener("click", () => {
-      viewMode = "timeline";
-      document.getElementById("timelineBtn").classList.add("active");
-      document.getElementById("listBtn").classList.remove("active");
-      render();
-    });
-
-    document.getElementById("listBtn").addEventListener("click", () => {
-      viewMode = "list";
-      document.getElementById("listBtn").classList.add("active");
-      document.getElementById("timelineBtn").classList.remove("active");
-      render();
-    });
-
-    document.getElementById("zoomInBtn").addEventListener("click", () => {
-      pxPerMinute = Math.min(2.4, pxPerMinute + 0.2);
-      render();
-    });
-
-    document.getElementById("zoomOutBtn").addEventListener("click", () => {
-      pxPerMinute = Math.max(0.8, pxPerMinute - 0.2);
-      render();
-    });
-
-    document.getElementById("resetBtn").addEventListener("click", () => {
-      if (confirm("Reset the shared Craig/Jess picks on both phones?")) {
-        events = originalEvents.map((event, index) => ({
-          ...event,
-          id: index,
-          craig: false,
-          jess: false
-        }));
-        render();
-        resetCloudPicks();
-      }
-    });
-
-    filterSelect.addEventListener("change", render);
-    stageSelect.addEventListener("change", render);
-
-    window.openSheet = openSheet;
-    window.closeSheet = closeSheet;
-    window.closeSheetFromBackdrop = closeSheetFromBackdrop;
-    window.togglePick = togglePick;
-
-    buildTabs();
-    buildStageFilter();
+    const data = snap.data() || {};
+    people = data.people || ["Craig","Jess"];
+    picksByPerson = data.picksByPerson || {};
+
+    if (!people.includes(activePerson)) activePerson = people[0] || "Craig";
+
+    buildPersonSelect();
+    buildDayTabs();
+    buildStageSelect();
     render();
-  </script>
+    setSyncStatus("Cloud sync: live ✓", "ok");
+  } catch(err) {
+    console.error(err);
+    setSyncStatus("Cloud sync error: " + err.message, "error");
+  }
+}, err => {
+  console.error(err);
+  setSyncStatus("Cloud sync error: " + err.message, "error");
+});
+
+function buildPersonSelect() {
+  personSelect.innerHTML = "";
+  people.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p;
+    opt.textContent = "Person: " + p;
+    personSelect.appendChild(opt);
+  });
+  personSelect.value = activePerson;
+}
+
+function buildDayTabs() {
+  const days = [...new Set(events.map(e => e.day))];
+  dayTabs.innerHTML = "";
+  days.forEach(day => {
+    const btn = document.createElement("button");
+    btn.className = "tab" + (day === activeDay ? " active" : "");
+    btn.textContent = shortDay(day);
+    btn.onclick = () => {
+      activeDay = day;
+      buildDayTabs();
+      buildStageSelect();
+      render();
+    };
+    dayTabs.appendChild(btn);
+  });
+}
+
+function buildStageSelect() {
+  const current = stageSelect.value;
+  const stages = [...new Set(events.filter(e => e.day === activeDay).map(e => e.stage))];
+  stageSelect.innerHTML = '<option value="all">All stages</option>';
+  stages.forEach(stage => {
+    const opt = document.createElement("option");
+    opt.value = stage;
+    opt.textContent = stage;
+    stageSelect.appendChild(opt);
+  });
+  stageSelect.value = stages.includes(current) ? current : "all";
+}
+
+function visibleEvents() {
+  const filter = filterSelect.value;
+  const stage = stageSelect.value;
+  const clashes = myClashes();
+  const clashIds = new Set(clashes.flat().map(e => e.id));
+
+  let list = events.filter(e => e.day === activeDay);
+  if (stage !== "all") list = list.filter(e => e.stage === stage);
+  if (filter === "mine") list = list.filter(e => picked(e.id));
+  if (filter === "group") list = list.filter(e => groupPicked(e.id));
+  if (filter === "popular") list = list.filter(e => peopleFor(e.id).length >= 2);
+  if (filter === "clashes") list = list.filter(e => clashIds.has(e.id));
+  return list;
+}
+
+function renderSummary(dayEvents, dayClashes) {
+  document.getElementById("dayCount").textContent = dayEvents.length;
+  document.getElementById("mineCount").textContent = dayEvents.filter(e => picked(e.id)).length;
+  document.getElementById("groupCount").textContent = dayEvents.filter(e => groupPicked(e.id)).length;
+  document.getElementById("clashCount").textContent = dayClashes.length;
+}
+
+function renderClashes(clashes) {
+  const dayClashes = clashes.filter(([a,b]) => a.day === activeDay || b.day === activeDay);
+  if (!dayClashes.length) {
+    clashSection.innerHTML = "";
+    return;
+  }
+  clashSection.innerHTML = `<div class="clash-box"><div class="clash-title">⚠️ ${escapeHtml(activePerson)} has clashes</div>` +
+    dayClashes.map(([a,b]) => `<div class="clash-item">${escapeHtml(a.artist)} ${a.start}-${a.end} clashes with ${escapeHtml(b.artist)} ${b.start}-${b.end}</div>`).join("") +
+    `</div>`;
+}
+
+function eventClass(e, clashes) {
+  let cls = "";
+  if (picked(e.id)) cls += " mine";
+  else if (groupPicked(e.id)) cls += " group";
+  if (hasClash(e, clashes)) cls += " clash";
+  return cls;
+}
+
+function renderTimeline(list, clashes) {
+  if (!list.length) {
+    timelineEl.innerHTML = `<div class="empty">No acts to show.</div>`;
+    return;
+  }
+
+  const dayEvents = events.filter(e => e.day === activeDay);
+  const minTime = Math.floor(Math.min(...dayEvents.map(e => toMinutes(e.start))) / 60) * 60;
+  const maxTime = Math.ceil(Math.max(...dayEvents.map(e => toMinutes(e.end))) / 60) * 60;
+  const height = Math.max(420, (maxTime - minTime) * pxPerMinute);
+  const selectedStage = stageSelect.value;
+  const stages = selectedStage === "all" ? [...new Set(dayEvents.map(e => e.stage))] : [selectedStage];
+  const grid = `var(--timecol) repeat(${stages.length}, var(--stagew))`;
+
+  let html = `<div class="stage-header" style="grid-template-columns:${grid};"><div class="corner">TIME</div>`;
+  html += stages.map(s => `<div class="stage-head">${escapeHtml(s)}</div>`).join("");
+  html += `</div><div class="grid-area" style="grid-template-columns:${grid};height:${height}px;"><div class="time-grid">`;
+
+  for (let t=minTime; t<=maxTime; t+=60) {
+    const top = (t - minTime) * pxPerMinute;
+    html += `<div class="hour-line" style="top:${top}px;"><div class="hour-label">${minuteLabel(t)}</div></div>`;
+  }
+
+  html += `</div><div class="stage-column time-spacer"></div>`;
+
+  stages.forEach(stage => {
+    html += `<div class="stage-column">`;
+    list.filter(e => e.stage === stage).sort((a,b) => toMinutes(a.start) - toMinutes(b.start)).forEach(e => {
+      const top = (toMinutes(e.start) - minTime) * pxPerMinute + 3;
+      const h = Math.max(38, (toMinutes(e.end) - toMinutes(e.start)) * pxPerMinute - 6);
+      const peeps = peopleFor(e.id);
+      html += `<div class="act${eventClass(e, clashes)}" style="top:${top}px;height:${h}px;" onclick="openSheet(${e.id})">
+        <div class="act-title">${escapeHtml(e.artist)}</div>
+        <div class="act-time">${e.start}-${e.end}</div>
+        <div class="act-people">${escapeHtml(peeps.join(", "))}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  timelineEl.innerHTML = html;
+}
+
+function renderCards(list, clashes) {
+  if (!list.length) {
+    cardsEl.innerHTML = `<div class="empty">No acts to show.</div>`;
+    return;
+  }
+
+  cardsEl.innerHTML = list.sort((a,b) => toMinutes(a.start) - toMinutes(b.start)).map(e => {
+    const peeps = peopleFor(e.id);
+    const cls = picked(e.id) ? " mine" : groupPicked(e.id) ? " group" : "";
+    const clash = hasClash(e, clashes) ? " clash" : "";
+    return `<div class="card${cls}${clash}" onclick="openSheet(${e.id})">
+      <div class="card-title">${escapeHtml(e.artist)}</div>
+      <div class="card-meta">${e.start}-${e.end} · ${escapeHtml(e.stage)}</div>
+      <div class="badges">${peeps.length ? `<span class="badge">${escapeHtml(peeps.join(", "))}</span>` : ""}${hasClash(e, clashes) ? `<span class="badge">Clash</span>` : ""}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderGroup() {
+  const rows = events.map(e => ({...e, peeps: peopleFor(e.id)}))
+    .filter(e => e.peeps.length)
+    .sort((a,b) => b.peeps.length - a.peeps.length || toMinutes(a.start) - toMinutes(b.start));
+
+  if (!rows.length) {
+    groupList.innerHTML = `<div class="empty">Nobody has picked anything yet.</div>`;
+    return;
+  }
+
+  groupList.innerHTML = rows.map(e => `<div class="group-row" onclick="openSheet(${e.id})">
+    <div>
+      <div class="group-title">${escapeHtml(e.artist)}</div>
+      <div class="group-meta">${escapeHtml(shortDay(e.day))} · ${e.start}-${e.end} · ${escapeHtml(e.stage)} · ${escapeHtml(e.peeps.join(", "))}</div>
+    </div>
+    <div class="group-count">${e.peeps.length} picked</div>
+  </div>`).join("");
+}
+
+function render() {
+  const clashes = myClashes();
+  const dayEvents = events.filter(e => e.day === activeDay);
+  const dayClashes = clashes.filter(([a,b]) => a.day === activeDay || b.day === activeDay);
+  const list = visibleEvents();
+
+  renderSummary(dayEvents, dayClashes);
+  renderClashes(clashes);
+  renderTimeline(list, clashes);
+  renderCards(list, clashes);
+  renderGroup();
+
+  document.getElementById("timelineView").style.display = viewMode === "timeline" ? "block" : "none";
+  document.getElementById("listView").style.display = viewMode === "list" ? "block" : "none";
+  document.getElementById("groupView").style.display = viewMode === "group" ? "block" : "none";
+}
+
+function openSheet(id) {
+  selectedEventId = id;
+  const e = events.find(x => x.id === id);
+  const mine = picked(id);
+  const peeps = peopleFor(id);
+
+  sheetTitle.textContent = e.artist;
+  sheetMeta.textContent = `${e.start}-${e.end} · ${e.stage}`;
+  peopleText.textContent = peeps.length ? "Picked by: " + peeps.join(", ") : "Nobody picked this yet.";
+  pickBtn.textContent = mine ? "✓ " + activePerson + " wants this" : activePerson + " wants this";
+  pickBtn.className = mine ? "mine-on" : "";
+  sheetBg.style.display = "flex";
+}
+
+pickBtn.addEventListener("click", () => {
+  if (selectedEventId === null) return;
+  const pkey = key(activePerson);
+  if (!picksByPerson[pkey]) picksByPerson[pkey] = {};
+
+  if (picksByPerson[pkey][String(selectedEventId)]) {
+    delete picksByPerson[pkey][String(selectedEventId)];
+  } else {
+    picksByPerson[pkey][String(selectedEventId)] = true;
+  }
+
+  openSheet(selectedEventId);
+  render();
+  saveCloud();
+});
+
+function closeSheet() {
+  sheetBg.style.display = "none";
+  selectedEventId = null;
+}
+
+function closeSheetFromBackdrop(event) {
+  if (event.target === sheetBg) closeSheet();
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+personSelect.addEventListener("change", () => {
+  activePerson = personSelect.value;
+  localStorage.setItem("activeFestivalPerson", activePerson);
+  render();
+});
+
+filterSelect.addEventListener("change", render);
+stageSelect.addEventListener("change", render);
+
+document.getElementById("timelineBtn").onclick = () => setView("timeline");
+document.getElementById("listBtn").onclick = () => setView("list");
+document.getElementById("groupBtn").onclick = () => setView("group");
+
+function setView(view) {
+  viewMode = view;
+  document.getElementById("timelineBtn").classList.toggle("active", view === "timeline");
+  document.getElementById("listBtn").classList.toggle("active", view === "list");
+  document.getElementById("groupBtn").classList.toggle("active", view === "group");
+  render();
+}
+
+document.getElementById("addPersonBtn").onclick = () => {
+  const name = prompt("Name of person to add?");
+  if (!name || !name.trim()) return;
+
+  const person = name.trim();
+  if (!people.includes(person)) {
+    people.push(person);
+    picksByPerson[key(person)] = picksByPerson[key(person)] || {};
+  }
+
+  activePerson = person;
+  localStorage.setItem("activeFestivalPerson", activePerson);
+  buildPersonSelect();
+  render();
+  saveCloud();
+};
+
+document.getElementById("resetBtn").onclick = () => {
+  if (!confirm("Reset every person's picks?")) return;
+  picksByPerson = {};
+  people.forEach(p => picksByPerson[key(p)] = {});
+  render();
+  saveCloud();
+};
+
+window.openSheet = openSheet;
+window.closeSheet = closeSheet;
+window.closeSheetFromBackdrop = closeSheetFromBackdrop;
+
+buildPersonSelect();
+buildDayTabs();
+buildStageSelect();
+render();
+</script>
 </body>
 </html>
