@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#0f1117" />
 
-  <title>Festival Clash Finder V3</title>
+  <title>Festival Clash Finder V4 Sync</title>
 
   <style>
     :root {
@@ -123,6 +123,21 @@
     .chip.active {
       background: var(--card2);
       border-color: var(--both);
+    }
+
+    #syncStatus {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    #syncStatus.ok {
+      color: var(--both);
+    }
+
+    #syncStatus.error {
+      color: var(--danger);
     }
 
     main {
@@ -542,7 +557,7 @@
 <body>
   <header>
     <h1>Festival Clash Finder 🎪</h1>
-    <div class="subtitle">V3: phone-friendly vertical timeline. Time goes down, stages go across.</div>
+    <div class="subtitle">V4: shared Craig/Jess picks using Firebase cloud sync.</div>
 
     <div class="tabs" id="dayTabs"></div>
 
@@ -568,6 +583,8 @@
       <button class="chip" id="zoomInBtn">+ Zoom</button>
       <button class="chip" id="resetBtn">Reset picks</button>
     </div>
+
+    <div id="syncStatus">Cloud sync: connecting...</div>
   </header>
 
   <main>
@@ -628,7 +645,30 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      onSnapshot,
+      setDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSy-GdewVtIqAuJ6WgpCGcKDUwWiXev6nko",
+      authDomain: "festival-clash-finder.firebaseapp.com",
+      projectId: "festival-clash-finder",
+      storageBucket: "festival-clash-finder.firebasestorage.app",
+      messagingSenderId: "1089096352897",
+      appId: "1:1089096352897:web:2009bf7ea36452ede7980",
+      measurementId: "G-4NZN4062FH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const planRef = doc(db, "festivalPlans", "mainPlan");
+
     const originalEvents = [{"stage": "Unknown Stage", "day": "Friday 5th June", "start": "14:00", "end": "15:00", "artist": "ARK-S", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "15:00", "end": "16:15", "artist": "Jamback", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "16:15", "end": "17:45", "artist": "Kolter", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "17:45", "end": "19:15", "artist": "Sidney Charles", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "19:15", "end": "21:00", "artist": "Rossi.", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "21:00", "end": "23:00", "artist": "Chris Stussy", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "12:00", "end": "13:15", "artist": "Joe Quinn", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "13:15", "end": "14:30", "artist": "Troxy", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "14:30", "end": "16:30", "artist": "L.P. Rhythm", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "16:30", "end": "18:00", "artist": "Luuk Van Dijk", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "18:00", "end": "20:00", "artist": "Michael Bibi", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "20:00", "end": "21:30", "artist": "Jamie Jones", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "21:30", "end": "23:00", "artist": "Franky Rizardo", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "12:00", "end": "14:00", "artist": "Nath Brown", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "14:00", "end": "15:15", "artist": "Omar+", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "15:15", "end": "16:30", "artist": "Gaskin", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "16:30", "end": "18:00", "artist": "SOSA", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "18:00", "end": "19:30", "artist": "ALISHA", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "19:30", "end": "21:00", "artist": "East End Dubs", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "21:00", "end": "22:55", "artist": "Max Dean b2b Luke Dean", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "14:00", "end": "15:15", "artist": "Joe Hunt", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "15:15", "end": "16:15", "artist": "Skepsis", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "16:15", "end": "17:15", "artist": "Flava D", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "17:15", "end": "18:15", "artist": "A Little Sound", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "18:15", "end": "19:15", "artist": "FMS", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "19:15", "end": "20:30", "artist": "Basslayerz", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "20:30", "end": "21:45", "artist": "SOTA", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "21:45", "end": "23:00", "artist": "Pendulum (DJ Set)", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "12:00", "end": "13:30", "artist": "ADRIANNA", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "13:30", "end": "15:00", "artist": "BK", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "15:00", "end": "16:15", "artist": "Stella Bossi", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "16:15", "end": "17:45", "artist": "Alex Farell", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "17:45", "end": "19:15", "artist": "Restricted", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "19:15", "end": "20:45", "artist": "HOLY PRIEST", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "20:45", "end": "21:45", "artist": "Alt8", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "21:45", "end": "23:00", "artist": "Hannah Laing", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "12:00", "end": "13:30", "artist": "Pipes", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "13:30", "end": "15:00", "artist": "Reallms", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "15:00", "end": "16:30", "artist": "Jaden Thompson", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "16:30", "end": "18:00", "artist": "bullet tooth", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "18:00", "end": "19:30", "artist": "Joe Rolét", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "19:30", "end": "21:00", "artist": "Obskür", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "21:00", "end": "22:55", "artist": "Ewan McVicar", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "15:00", "end": "16:30", "artist": "Jake Fitz", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "16:30", "end": "18:00", "artist": "Emerald", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "18:00", "end": "19:30", "artist": "Oldboy", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "19:30", "end": "21:30", "artist": "Dr Banana", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "21:30", "end": "23:00", "artist": "Phill de Janeiro b2b Benji King", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "12:00", "end": "13:00", "artist": "Emma 2000", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "13:00", "end": "14:15", "artist": "Yesmann", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "14:15", "end": "15:45", "artist": "Joss Dean", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "15:45", "end": "17:00", "artist": "Max Trevett", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "17:00", "end": "19:00", "artist": "GIGSTA", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "19:00", "end": "21:00", "artist": "Tommy Phillips", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "21:00", "end": "23:00", "artist": "Watchers", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "13:00", "end": "14:00", "artist": "The Obsessed", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "14:00", "end": "15:00", "artist": "DJ Jock", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "15:00", "end": "16:00", "artist": "Drunken Kong", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "16:00", "end": "17:30", "artist": "Yellowheads", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "17:30", "end": "19:00", "artist": "Spartaque", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "19:00", "end": "20:30", "artist": "Nicole Moudaber", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "20:30", "end": "22:00", "artist": "Pan-Pot", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "22:00", "end": "22:55", "artist": "ADRIANNA", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "12:30", "end": "14:40", "artist": "Jayfor", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "14:40", "end": "15:50", "artist": "Pola & Bryson", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "15:50", "end": "17:00", "artist": "Lens", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "17:00", "end": "18:10", "artist": "Koven", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "18:10", "end": "19:20", "artist": "Culture Shock", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "19:20", "end": "20:30", "artist": "K Motionz", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "20:30", "end": "21:45", "artist": "Sub Focus", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "21:45", "end": "23:00", "artist": "Hybrid Minds", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "12:00", "end": "14:00", "artist": "Jayfor", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "14:00", "end": "15:15", "artist": "Danny Byrd", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "15:15", "end": "16:15", "artist": "Badger", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "16:15", "end": "17:15", "artist": "Harriet Jaxxon", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "17:15", "end": "18:15", "artist": "Mozey", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "18:15", "end": "19:30", "artist": "Wilkinson", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "19:30", "end": "20:45", "artist": "Bou b2b Hedex", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "20:45", "end": "21:55", "artist": "Andy C", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "21:55", "end": "22:55", "artist": "Kings of the Rollers", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "12:00", "end": "13:30", "artist": "Rue Jay", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "13:30", "end": "15:00", "artist": "Jess Bays", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "15:00", "end": "16:30", "artist": "Low Steppa", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "16:30", "end": "18:00", "artist": "D.O.D", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "18:00", "end": "19:30", "artist": "TeeDee", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "19:30", "end": "21:15", "artist": "Morgan Seatree", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "21:15", "end": "23:00", "artist": "MK", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "12:00", "end": "14:30", "artist": "George Kafetzis", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "14:30", "end": "16:00", "artist": "Hitty", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "16:00", "end": "17:30", "artist": "Sammy Porter b2b George Mensah", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "17:30", "end": "19:30", "artist": "Patrick Topping", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "19:30", "end": "20:55", "artist": "Tita Lau", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "20:55", "end": "22:55", "artist": "James Hype", "craig": true, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "12:00", "end": "13:45", "artist": "Samantha Neal", "craig": false, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "13:45", "end": "15:15", "artist": "Nathan Dawe", "craig": false, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "15:15", "end": "16:30", "artist": "Girls Don't Sync", "craig": false, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "16:30", "end": "17:45", "artist": "Shy FX", "craig": true, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "17:45", "end": "19:00", "artist": "DJ EZ", "craig": true, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "19:00", "end": "21:00", "artist": "Silva Bumpa", "craig": false, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "21:00", "end": "22:30", "artist": "MPH", "craig": false, "jess": false}];
 
     let events = originalEvents.map((event, index) => ({
@@ -636,16 +676,6 @@
       id: index
     }));
 
-    const saved = localStorage.getItem("festivalClashPicksV3");
-    if (saved) {
-      try {
-        const savedEvents = JSON.parse(saved);
-        events = events.map(event => {
-          const savedEvent = savedEvents.find(x => x.id === event.id);
-          return savedEvent ? { ...event, craig: savedEvent.craig, jess: savedEvent.jess } : event;
-        });
-      } catch(e) {}
-    }
 
     let activeDay = [...new Set(events.map(e => e.day))][0];
     let viewMode = "timeline";
@@ -663,6 +693,7 @@
     const sheetMeta = document.getElementById("sheetMeta");
     const sheetCraigBtn = document.getElementById("sheetCraigBtn");
     const sheetJessBtn = document.getElementById("sheetJessBtn");
+    const syncStatus = document.getElementById("syncStatus");
 
     const days = [...new Set(events.map(e => e.day))];
 
@@ -726,13 +757,111 @@
       return clashes.some(([a, b]) => a.id === event.id || b.id === event.id);
     }
 
-    function savePicks() {
-      localStorage.setItem("festivalClashPicksV3", JSON.stringify(events.map(e => ({
-        id: e.id,
-        craig: e.craig,
-        jess: e.jess
-      }))));
+    function setSyncStatus(message, state = "") {
+      syncStatus.textContent = message;
+      syncStatus.className = state;
     }
+
+    function getInitialPicks() {
+      const picks = {};
+
+      originalEvents.forEach((event, index) => {
+        if (event.craig || event.jess) {
+          picks[String(index)] = {
+            craig: Boolean(event.craig),
+            jess: Boolean(event.jess)
+          };
+        }
+      });
+
+      return picks;
+    }
+
+    function applyCloudPicks(picks = {}) {
+      events = originalEvents.map((event, index) => {
+        const pick = picks[String(index)] || {};
+        return {
+          ...event,
+          id: index,
+          craig: Boolean(pick.craig),
+          jess: Boolean(pick.jess)
+        };
+      });
+    }
+
+    async function seedInitialPicks() {
+      setSyncStatus("Cloud sync: setting up first shared plan...");
+      await setDoc(planRef, {
+        initialized: true,
+        updatedAt: serverTimestamp(),
+        picks: getInitialPicks()
+      }, { merge: true });
+    }
+
+    async function saveEventPick(event) {
+      try {
+        setSyncStatus("Cloud sync: saving...");
+        await setDoc(planRef, {
+          initialized: true,
+          updatedAt: serverTimestamp(),
+          picks: {
+            [String(event.id)]: {
+              craig: Boolean(event.craig),
+              jess: Boolean(event.jess)
+            }
+          }
+        }, { merge: true });
+        setSyncStatus("Cloud sync: live ✓", "ok");
+      } catch (error) {
+        console.error(error);
+        setSyncStatus("Cloud sync error: " + error.message, "error");
+      }
+    }
+
+    async function resetCloudPicks() {
+      try {
+        setSyncStatus("Cloud sync: resetting...");
+        await setDoc(planRef, {
+          initialized: true,
+          updatedAt: serverTimestamp(),
+          picks: {}
+        });
+        setSyncStatus("Cloud sync: reset ✓", "ok");
+      } catch (error) {
+        console.error(error);
+        setSyncStatus("Cloud sync error: " + error.message, "error");
+      }
+    }
+
+    onSnapshot(planRef, async (snapshot) => {
+      try {
+        if (!snapshot.exists()) {
+          await seedInitialPicks();
+          return;
+        }
+
+        const data = snapshot.data() || {};
+        const picks = data.picks || {};
+        const hasPicks = Object.keys(picks).length > 0;
+
+        if (!data.initialized && !hasPicks) {
+          await seedInitialPicks();
+          return;
+        }
+
+        applyCloudPicks(picks);
+        buildTabs();
+        buildStageFilter();
+        render();
+        setSyncStatus("Cloud sync: live ✓", "ok");
+      } catch (error) {
+        console.error(error);
+        setSyncStatus("Cloud sync error: " + error.message, "error");
+      }
+    }, (error) => {
+      console.error(error);
+      setSyncStatus("Cloud sync error: " + error.message, "error");
+    });
 
     function buildTabs() {
       dayTabs.innerHTML = "";
@@ -981,7 +1110,7 @@
       if (selectedEventId === null) return;
       const event = events.find(e => e.id === selectedEventId);
       event.craig = !event.craig;
-      savePicks();
+      saveEventPick(event);
       updateSheetButtons(event);
       render();
     });
@@ -990,7 +1119,7 @@
       if (selectedEventId === null) return;
       const event = events.find(e => e.id === selectedEventId);
       event.jess = !event.jess;
-      savePicks();
+      saveEventPick(event);
       updateSheetButtons(event);
       render();
     });
@@ -1007,7 +1136,7 @@
     function togglePick(id, person) {
       const event = events.find(e => e.id === id);
       event[person] = !event[person];
-      savePicks();
+      saveEventPick(event);
       render();
     }
 
@@ -1045,18 +1174,25 @@
     });
 
     document.getElementById("resetBtn").addEventListener("click", () => {
-      if (confirm("Reset all saved Craig/Jess picks?")) {
-        localStorage.removeItem("festivalClashPicksV3");
+      if (confirm("Reset the shared Craig/Jess picks on both phones?")) {
         events = originalEvents.map((event, index) => ({
           ...event,
-          id: index
+          id: index,
+          craig: false,
+          jess: false
         }));
         render();
+        resetCloudPicks();
       }
     });
 
     filterSelect.addEventListener("change", render);
     stageSelect.addEventListener("change", render);
+
+    window.openSheet = openSheet;
+    window.closeSheet = closeSheet;
+    window.closeSheetFromBackdrop = closeSheetFromBackdrop;
+    window.togglePick = togglePick;
 
     buildTabs();
     buildStageFilter();
