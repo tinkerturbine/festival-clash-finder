@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f1117" />
+
+  <title>Festival Clash Finder V2</title>
+
+  <style>
+    :root {
+      --bg: #0f1117;
+      --panel: #151925;
+      --card: #1d2230;
+      --card2: #252b3b;
+      --text: #f4f4f7;
+      --muted: #a8acb8;
+      --border: #34394a;
+      --craig: #3da5ff;
+      --jess: #d46bff;
+      --both: #2ee59d;
+      --danger: #ff5757;
+      --warning: #ffd166;
+      --unpicked: #303648;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      overflow-x: hidden;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(180deg, #151925 0%, #0f1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 10px 10px;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin-bottom: 9px;
+    }
+
+    .tab {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: 10px 7px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: var(--both);
+      color: #062015;
+      border-color: var(--both);
+    }
+
+    .top-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-bottom: 8px;
+    }
+
+    select, button {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    .chips {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .chip {
+      white-space: nowrap;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .chip.active {
+      background: var(--card2);
+      border-color: var(--both);
+    }
+
+    main {
+      padding: 10px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+      margin-bottom: 10px;
+    }
+
+    .summary-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 9px 6px;
+      text-align: center;
+    }
+
+    .summary-number {
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .dot.craig { background: var(--craig); }
+    .dot.jess { background: var(--jess); }
+    .dot.both { background: var(--both); }
+    .dot.clash { background: var(--danger); }
+    .dot.none { background: var(--unpicked); }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 900;
+      margin: 14px 0 8px;
+    }
+
+    .timeline-wrap {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .timeline-scroll {
+      overflow-x: auto;
+      padding: 10px 0 12px;
+    }
+
+    .timeline {
+      position: relative;
+      min-width: 950px;
+      padding: 0 10px 0 112px;
+    }
+
+    .time-axis {
+      position: relative;
+      height: 32px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tick {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-left: 1px solid rgba(255,255,255,0.12);
+      color: var(--muted);
+      font-size: 11px;
+      padding-left: 4px;
+    }
+
+    .stage-row {
+      position: relative;
+      height: 72px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .stage-row:last-child {
+      border-bottom: none;
+    }
+
+    .stage-label {
+      position: absolute;
+      left: -102px;
+      top: 10px;
+      width: 92px;
+      font-size: 12px;
+      color: var(--text);
+      font-weight: 800;
+      line-height: 1.15;
+      text-align: right;
+    }
+
+    .bar {
+      position: absolute;
+      top: 9px;
+      height: 52px;
+      border-radius: 12px;
+      background: var(--unpicked);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: var(--text);
+      padding: 6px 7px;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    }
+
+    .bar.craig {
+      background: linear-gradient(135deg, rgba(61,165,255,0.95), rgba(24,79,130,0.95));
+      color: white;
+    }
+
+    .bar.jess {
+      background: linear-gradient(135deg, rgba(212,107,255,0.95), rgba(112,43,145,0.95));
+      color: white;
+    }
+
+    .bar.both {
+      background: linear-gradient(135deg, rgba(46,229,157,0.95), rgba(18,109,75,0.95));
+      color: #031912;
+    }
+
+    .bar.clash {
+      outline: 3px solid var(--danger);
+      outline-offset: -2px;
+    }
+
+    .bar-artist {
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.15;
+    }
+
+    .bar-time {
+      margin-top: 3px;
+      color: rgba(255,255,255,0.78);
+      font-size: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bar.both .bar-time {
+      color: rgba(0,0,0,0.72);
+    }
+
+    .clash-box {
+      background: #2a1717;
+      border: 1px solid var(--danger);
+      border-radius: 18px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .clash-title {
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .clash-item {
+      color: #ffd0d0;
+      font-size: 13px;
+      line-height: 1.35;
+      margin: 7px 0;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px;
+      padding-bottom: 40px;
+    }
+
+    .event-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 11px;
+    }
+
+    .event-card.craig {
+      border-left: 5px solid var(--craig);
+    }
+
+    .event-card.jess {
+      border-left: 5px solid var(--jess);
+    }
+
+    .event-card.both {
+      border-left: 5px solid var(--both);
+      background: #14231d;
+    }
+
+    .event-card.clash {
+      outline: 2px solid var(--danger);
+    }
+
+    .artist {
+      font-size: 17px;
+      font-weight: 900;
+      margin-bottom: 3px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .badge {
+      border: 1px solid var(--border);
+      background: var(--card2);
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    .badge-craig { border-color: var(--craig); }
+    .badge-jess { border-color: var(--jess); }
+    .badge-both { border-color: var(--both); }
+    .badge-clash { border-color: var(--danger); }
+
+    .pick-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pick {
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .pick.craig-on {
+      background: var(--craig);
+      color: #04121f;
+      border-color: var(--craig);
+    }
+
+    .pick.jess-on {
+      background: var(--jess);
+      color: #19001f;
+      border-color: var(--jess);
+    }
+
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 28px 10px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .help-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      margin: 7px 1px 11px;
+    }
+
+    @media (min-width: 800px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .timeline {
+        min-width: 1050px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Festival Clash Finder 🎪</h1>
+    <div class="subtitle">Timeline view, day tabs, Craig/Jess picks, automatic clash warnings.</div>
+
+    <div class="tabs" id="dayTabs"></div>
+
+    <div class="top-controls">
+      <select id="filterSelect">
+        <option value="all">Show all acts</option>
+        <option value="selected">Selected only</option>
+        <option value="craig">Craig picks</option>
+        <option value="jess">Jess picks</option>
+        <option value="both">Both picks</option>
+        <option value="clashes">Clashes only</option>
+      </select>
+
+      <select id="stageSelect">
+        <option value="all">All stages</option>
+      </select>
+    </div>
+
+    <div class="chips">
+      <button class="chip active" id="timelineBtn">Timeline</button>
+      <button class="chip" id="listBtn">List</button>
+      <button class="chip" id="resetBtn">Reset picks</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="summary">
+      <div class="summary-card">
+        <div class="summary-number" id="dayCount">0</div>
+        <div class="summary-label">acts today</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number" id="craigCount">0</div>
+        <div class="summary-label">Craig</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number" id="jessCount">0</div>
+        <div class="summary-label">Jess</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number" id="clashCount">0</div>
+        <div class="summary-label">clashes</div>
+      </div>
+    </section>
+
+    <section class="legend">
+      <span class="legend-item"><span class="dot none"></span> Unpicked</span>
+      <span class="legend-item"><span class="dot craig"></span> Craig</span>
+      <span class="legend-item"><span class="dot jess"></span> Jess</span>
+      <span class="legend-item"><span class="dot both"></span> Both</span>
+      <span class="legend-item"><span class="dot clash"></span> Clash</span>
+    </section>
+
+    <section id="clashSection"></section>
+
+    <section id="timelineView">
+      <div class="section-title">Timeline</div>
+      <div class="help-note">Swipe sideways to see the whole day. Tap any block to add/remove Craig or Jess.</div>
+      <div class="timeline-wrap">
+        <div class="timeline-scroll">
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="listView" style="display:none;">
+      <div class="section-title">Act list</div>
+      <div class="cards" id="cards"></div>
+    </section>
+  </main>
+
+  <script>
+    const originalEvents = [{"stage": "Unknown Stage", "day": "Friday 5th June", "start": "14:00", "end": "15:00", "artist": "ARK-S", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "15:00", "end": "16:15", "artist": "Jamback", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "16:15", "end": "17:45", "artist": "Kolter", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "17:45", "end": "19:15", "artist": "Sidney Charles", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "19:15", "end": "21:00", "artist": "Rossi.", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Friday 5th June", "start": "21:00", "end": "23:00", "artist": "Chris Stussy", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "12:00", "end": "13:15", "artist": "Joe Quinn", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "13:15", "end": "14:30", "artist": "Troxy", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "14:30", "end": "16:30", "artist": "L.P. Rhythm", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "16:30", "end": "18:00", "artist": "Luuk Van Dijk", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "18:00", "end": "20:00", "artist": "Michael Bibi", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "20:00", "end": "21:30", "artist": "Jamie Jones", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Saturday 6th June", "start": "21:30", "end": "23:00", "artist": "Franky Rizardo", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "12:00", "end": "14:00", "artist": "Nath Brown", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "14:00", "end": "15:15", "artist": "Omar+", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "15:15", "end": "16:30", "artist": "Gaskin", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "16:30", "end": "18:00", "artist": "SOSA", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "18:00", "end": "19:30", "artist": "ALISHA", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "19:30", "end": "21:00", "artist": "East End Dubs", "craig": false, "jess": false}, {"stage": "Unknown Stage", "day": "Sunday 7th June", "start": "21:00", "end": "22:55", "artist": "Max Dean b2b Luke Dean", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "14:00", "end": "15:15", "artist": "Joe Hunt", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "15:15", "end": "16:15", "artist": "Skepsis", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "16:15", "end": "17:15", "artist": "Flava D", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "17:15", "end": "18:15", "artist": "A Little Sound", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "18:15", "end": "19:15", "artist": "FMS", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "19:15", "end": "20:30", "artist": "Basslayerz", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "20:30", "end": "21:45", "artist": "SOTA", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Friday 5th June", "start": "21:45", "end": "23:00", "artist": "Pendulum (DJ Set)", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "12:00", "end": "13:30", "artist": "ADRIANNA", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "13:30", "end": "15:00", "artist": "BK", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "15:00", "end": "16:15", "artist": "Stella Bossi", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "16:15", "end": "17:45", "artist": "Alex Farell", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "17:45", "end": "19:15", "artist": "Restricted", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "19:15", "end": "20:45", "artist": "HOLY PRIEST", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "20:45", "end": "21:45", "artist": "Alt8", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Saturday 6th June", "start": "21:45", "end": "23:00", "artist": "Hannah Laing", "craig": true, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "12:00", "end": "13:30", "artist": "Pipes", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "13:30", "end": "15:00", "artist": "Reallms", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "15:00", "end": "16:30", "artist": "Jaden Thompson", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "16:30", "end": "18:00", "artist": "bullet tooth", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "18:00", "end": "19:30", "artist": "Joe Rolét", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "19:30", "end": "21:00", "artist": "Obskür", "craig": false, "jess": false}, {"stage": "Arcadia Spider", "day": "Sunday 7th June", "start": "21:00", "end": "22:55", "artist": "Ewan McVicar", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "15:00", "end": "16:30", "artist": "Jake Fitz", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "16:30", "end": "18:00", "artist": "Emerald", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "18:00", "end": "19:30", "artist": "Oldboy", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "19:30", "end": "21:30", "artist": "Dr Banana", "craig": false, "jess": false}, {"stage": "Sola", "day": "Friday 5th June", "start": "21:30", "end": "23:00", "artist": "Phill de Janeiro b2b Benji King", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "12:00", "end": "13:00", "artist": "Emma 2000", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "13:00", "end": "14:15", "artist": "Yesmann", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "14:15", "end": "15:45", "artist": "Joss Dean", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "15:45", "end": "17:00", "artist": "Max Trevett", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "17:00", "end": "19:00", "artist": "GIGSTA", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "19:00", "end": "21:00", "artist": "Tommy Phillips", "craig": false, "jess": false}, {"stage": "Sola", "day": "Saturday 6th June", "start": "21:00", "end": "23:00", "artist": "Watchers", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "13:00", "end": "14:00", "artist": "The Obsessed", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "14:00", "end": "15:00", "artist": "DJ Jock", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "15:00", "end": "16:00", "artist": "Drunken Kong", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "16:00", "end": "17:30", "artist": "Yellowheads", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "17:30", "end": "19:00", "artist": "Spartaque", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "19:00", "end": "20:30", "artist": "Nicole Moudaber", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "20:30", "end": "22:00", "artist": "Pan-Pot", "craig": false, "jess": false}, {"stage": "Sola", "day": "Sunday 7th June", "start": "22:00", "end": "22:55", "artist": "ADRIANNA", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "12:30", "end": "14:40", "artist": "Jayfor", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "14:40", "end": "15:50", "artist": "Pola & Bryson", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "15:50", "end": "17:00", "artist": "Lens", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "17:00", "end": "18:10", "artist": "Koven", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "18:10", "end": "19:20", "artist": "Culture Shock", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "19:20", "end": "20:30", "artist": "K Motionz", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "20:30", "end": "21:45", "artist": "Sub Focus", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Saturday 6th June", "start": "21:45", "end": "23:00", "artist": "Hybrid Minds", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "12:00", "end": "14:00", "artist": "Jayfor", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "14:00", "end": "15:15", "artist": "Danny Byrd", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "15:15", "end": "16:15", "artist": "Badger", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "16:15", "end": "17:15", "artist": "Harriet Jaxxon", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "17:15", "end": "18:15", "artist": "Mozey", "craig": false, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "18:15", "end": "19:30", "artist": "Wilkinson", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "19:30", "end": "20:45", "artist": "Bou b2b Hedex", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "20:45", "end": "21:55", "artist": "Andy C", "craig": true, "jess": false}, {"stage": "Reactor", "day": "Sunday 7th June", "start": "21:55", "end": "22:55", "artist": "Kings of the Rollers", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "12:00", "end": "13:30", "artist": "Rue Jay", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "13:30", "end": "15:00", "artist": "Jess Bays", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "15:00", "end": "16:30", "artist": "Low Steppa", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "16:30", "end": "18:00", "artist": "D.O.D", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "18:00", "end": "19:30", "artist": "TeeDee", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "19:30", "end": "21:15", "artist": "Morgan Seatree", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Saturday 6th June", "start": "21:15", "end": "23:00", "artist": "MK", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "12:00", "end": "14:30", "artist": "George Kafetzis", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "14:30", "end": "16:00", "artist": "Hitty", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "16:00", "end": "17:30", "artist": "Sammy Porter b2b George Mensah", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "17:30", "end": "19:30", "artist": "Patrick Topping", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "19:30", "end": "20:55", "artist": "Tita Lau", "craig": false, "jess": false}, {"stage": "Tempest", "day": "Sunday 7th June", "start": "20:55", "end": "22:55", "artist": "James Hype", "craig": true, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "12:00", "end": "13:45", "artist": "Samantha Neal", "craig": false, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "13:45", "end": "15:15", "artist": "Nathan Dawe", "craig": false, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "15:15", "end": "16:30", "artist": "Girls Don't Sync", "craig": false, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "16:30", "end": "17:45", "artist": "Shy FX", "craig": true, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "17:45", "end": "19:00", "artist": "DJ EZ", "craig": true, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "19:00", "end": "21:00", "artist": "Silva Bumpa", "craig": false, "jess": false}, {"stage": "Hive", "day": "Saturday 6th June", "start": "21:00", "end": "22:30", "artist": "MPH", "craig": false, "jess": false}];
+
+    let events = originalEvents.map((event, index) => ({
+      ...event,
+      id: index
+    }));
+
+    const saved = localStorage.getItem("festivalClashPicksV2");
+    if (saved) {
+      try {
+        const savedEvents = JSON.parse(saved);
+        events = events.map(event => {
+          const savedEvent = savedEvents.find(x => x.id === event.id);
+          return savedEvent ? { ...event, craig: savedEvent.craig, jess: savedEvent.jess } : event;
+        });
+      } catch(e) {}
+    }
+
+    let activeDay = [...new Set(events.map(e => e.day))][0];
+    let viewMode = "timeline";
+
+    const dayTabs = document.getElementById("dayTabs");
+    const filterSelect = document.getElementById("filterSelect");
+    const stageSelect = document.getElementById("stageSelect");
+    const timelineEl = document.getElementById("timeline");
+    const cardsEl = document.getElementById("cards");
+    const clashSection = document.getElementById("clashSection");
+
+    const days = [...new Set(events.map(e => e.day))];
+
+    function toMinutes(time) {
+      const [h, m] = time.split(":").map(Number);
+      return h * 60 + m;
+    }
+
+    function minuteLabel(mins) {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+    }
+
+    function overlaps(a, b) {
+      if (a.day !== b.day) return false;
+      return toMinutes(a.start) < toMinutes(b.end) && toMinutes(b.start) < toMinutes(a.end);
+    }
+
+    function selectedBySamePerson(a, b) {
+      return (a.craig && b.craig) || (a.jess && b.jess);
+    }
+
+    function getAllClashes() {
+      const clashes = [];
+      const selected = events.filter(e => e.craig || e.jess);
+
+      for (let i = 0; i < selected.length; i++) {
+        for (let j = i + 1; j < selected.length; j++) {
+          const a = selected[i];
+          const b = selected[j];
+
+          if (overlaps(a, b) && selectedBySamePerson(a, b)) {
+            clashes.push([a, b]);
+          }
+        }
+      }
+
+      return clashes;
+    }
+
+    function getVisibleEvents() {
+      const filter = filterSelect.value;
+      const selectedStage = stageSelect.value;
+      const clashes = getAllClashes();
+      const clashIds = new Set(clashes.flat().map(e => e.id));
+
+      let list = events.filter(e => e.day === activeDay);
+
+      if (selectedStage !== "all") list = list.filter(e => e.stage === selectedStage);
+      if (filter === "selected") list = list.filter(e => e.craig || e.jess);
+      if (filter === "craig") list = list.filter(e => e.craig);
+      if (filter === "jess") list = list.filter(e => e.jess);
+      if (filter === "both") list = list.filter(e => e.craig && e.jess);
+      if (filter === "clashes") list = list.filter(e => clashIds.has(e.id));
+
+      return list;
+    }
+
+    function eventHasClash(event, clashes) {
+      return clashes.some(([a, b]) => a.id === event.id || b.id === event.id);
+    }
+
+    function savePicks() {
+      localStorage.setItem("festivalClashPicksV2", JSON.stringify(events.map(e => ({
+        id: e.id,
+        craig: e.craig,
+        jess: e.jess
+      }))));
+    }
+
+    function buildTabs() {
+      dayTabs.innerHTML = "";
+
+      days.forEach(day => {
+        const button = document.createElement("button");
+        button.className = "tab" + (day === activeDay ? " active" : "");
+        button.textContent = shortDay(day);
+        button.onclick = () => {
+          activeDay = day;
+          buildTabs();
+          buildStageFilter();
+          render();
+        };
+        dayTabs.appendChild(button);
+      });
+    }
+
+    function shortDay(day) {
+      if (day.toLowerCase().includes("friday")) return "Friday";
+      if (day.toLowerCase().includes("saturday")) return "Saturday";
+      if (day.toLowerCase().includes("sunday")) return "Sunday";
+      return day;
+    }
+
+    function buildStageFilter() {
+      const current = stageSelect.value;
+      const stages = [...new Set(events.filter(e => e.day === activeDay).map(e => e.stage))];
+
+      stageSelect.innerHTML = '<option value="all">All stages</option>';
+
+      stages.forEach(stage => {
+        const option = document.createElement("option");
+        option.value = stage;
+        option.textContent = stage;
+        stageSelect.appendChild(option);
+      });
+
+      if (stages.includes(current)) {
+        stageSelect.value = current;
+      } else {
+        stageSelect.value = "all";
+      }
+    }
+
+    function pickClass(event, clashes) {
+      let classes = "";
+      if (event.craig && event.jess) classes += " both";
+      else if (event.craig) classes += " craig";
+      else if (event.jess) classes += " jess";
+      if (eventHasClash(event, clashes)) classes += " clash";
+      return classes;
+    }
+
+    function renderSummary(dayEvents, dayClashes) {
+      document.getElementById("dayCount").textContent = dayEvents.length;
+      document.getElementById("craigCount").textContent = dayEvents.filter(e => e.craig).length;
+      document.getElementById("jessCount").textContent = dayEvents.filter(e => e.jess).length;
+      document.getElementById("clashCount").textContent = dayClashes.length;
+    }
+
+    function renderClashes(dayClashes) {
+      if (dayClashes.length === 0) {
+        clashSection.innerHTML = "";
+        return;
+      }
+
+      let markup = `<div class="clash-box">
+        <div class="clash-title">⚠️ Clashes on ${escapeHtml(shortDay(activeDay))}</div>`;
+
+      dayClashes.forEach(([a, b]) => {
+        const people = [];
+        if (a.craig && b.craig) people.push("Craig");
+        if (a.jess && b.jess) people.push("Jess");
+
+        markup += `<div class="clash-item">
+          <strong>${people.join(" & ")}</strong>: 
+          ${escapeHtml(a.artist)} ${a.start}-${a.end} at ${escapeHtml(a.stage)}
+          overlaps with
+          ${escapeHtml(b.artist)} ${b.start}-${b.end} at ${escapeHtml(b.stage)}.
+        </div>`;
+      });
+
+      markup += `</div>`;
+      clashSection.innerHTML = markup;
+    }
+
+    function renderTimeline(list, clashes) {
+      if (list.length === 0) {
+        timelineEl.innerHTML = `<div class="empty">No acts to show for this filter.</div>`;
+        return;
+      }
+
+      const dayEvents = events.filter(e => e.day === activeDay);
+      const minTime = Math.floor(Math.min(...dayEvents.map(e => toMinutes(e.start))) / 60) * 60;
+      const maxTime = Math.ceil(Math.max(...dayEvents.map(e => toMinutes(e.end))) / 60) * 60;
+      const total = maxTime - minTime;
+
+      const selectedStage = stageSelect.value;
+      const stages = selectedStage === "all"
+        ? [...new Set(events.filter(e => e.day === activeDay).map(e => e.stage))]
+        : [selectedStage];
+
+      let markup = `<div class="time-axis">`;
+
+      for (let t = minTime; t <= maxTime; t += 60) {
+        const left = ((t - minTime) / total) * 100;
+        markup += `<div class="tick" style="left:${left}%">${minuteLabel(t)}</div>`;
+      }
+
+      markup += `</div>`;
+
+      stages.forEach(stage => {
+        markup += `<div class="stage-row">
+          <div class="stage-label">${escapeHtml(stage)}</div>`;
+
+        list
+          .filter(e => e.stage === stage)
+          .sort((a, b) => toMinutes(a.start) - toMinutes(b.start))
+          .forEach(event => {
+            const left = ((toMinutes(event.start) - minTime) / total) * 100;
+            const width = ((toMinutes(event.end) - toMinutes(event.start)) / total) * 100;
+
+            markup += `<div class="bar${pickClass(event, clashes)}"
+              style="left:${left}%; width:calc(${width}% - 4px);"
+              onclick="quickPick(${event.id})"
+              title="${escapeHtml(event.artist)}">
+
+              <div class="bar-artist">${escapeHtml(event.artist)}</div>
+              <div class="bar-time">${event.start}-${event.end}</div>
+            </div>`;
+          });
+
+        markup += `</div>`;
+      });
+
+      timelineEl.innerHTML = markup;
+    }
+
+    function renderCards(list, clashes) {
+      if (list.length === 0) {
+        cardsEl.innerHTML = `<div class="empty">No acts to show for this filter.</div>`;
+        return;
+      }
+
+      list.sort((a, b) => toMinutes(a.start) - toMinutes(b.start));
+
+      let markup = "";
+
+      list.forEach(event => {
+        const isBoth = event.craig && event.jess;
+        const isClash = eventHasClash(event, clashes);
+
+        let classes = "event-card";
+        if (isBoth) classes += " both";
+        else if (event.craig) classes += " craig";
+        else if (event.jess) classes += " jess";
+        if (isClash) classes += " clash";
+
+        markup += `<div class="${classes}">
+          <div class="artist">${escapeHtml(event.artist)}</div>
+          <div class="meta">${event.start} - ${event.end} · ${escapeHtml(event.stage)}</div>
+
+          <div class="badges">
+            ${event.craig ? '<span class="badge badge-craig">Craig</span>' : ''}
+            ${event.jess ? '<span class="badge badge-jess">Jess</span>' : ''}
+            ${isBoth ? '<span class="badge badge-both">Both want this</span>' : ''}
+            ${isClash ? '<span class="badge badge-clash">Clash</span>' : ''}
+          </div>
+
+          <div class="pick-buttons">
+            <button class="pick ${event.craig ? 'craig-on' : ''}" onclick="togglePick(${event.id}, 'craig')">
+              ${event.craig ? '✓ Craig' : 'Craig'}
+            </button>
+            <button class="pick ${event.jess ? 'jess-on' : ''}" onclick="togglePick(${event.id}, 'jess')">
+              ${event.jess ? '✓ Jess' : 'Jess'}
+            </button>
+          </div>
+        </div>`;
+      });
+
+      cardsEl.innerHTML = markup;
+    }
+
+    function render() {
+      const allClashes = getAllClashes();
+      const dayClashes = allClashes.filter(([a, b]) => a.day === activeDay || b.day === activeDay);
+      const dayEvents = events.filter(e => e.day === activeDay);
+      const visibleEvents = getVisibleEvents();
+
+      renderSummary(dayEvents, dayClashes);
+      renderClashes(dayClashes);
+      renderTimeline(visibleEvents, allClashes);
+      renderCards(visibleEvents, allClashes);
+
+      document.getElementById("timelineView").style.display = viewMode === "timeline" ? "block" : "none";
+      document.getElementById("listView").style.display = viewMode === "list" ? "block" : "none";
+    }
+
+    function quickPick(id) {
+      const event = events.find(e => e.id === id);
+      const choice = prompt(
+        `${event.artist}\n${event.start}-${event.end} at ${event.stage}\n\nType:\nC = toggle Craig\nJ = toggle Jess\nB = toggle both`,
+        ""
+      );
+
+      if (!choice) return;
+
+      const value = choice.trim().toLowerCase();
+
+      if (value === "c") event.craig = !event.craig;
+      if (value === "j") event.jess = !event.jess;
+      if (value === "b") {
+        event.craig = !event.craig;
+        event.jess = !event.jess;
+      }
+
+      savePicks();
+      render();
+    }
+
+    function togglePick(id, person) {
+      const event = events.find(e => e.id === id);
+      event[person] = !event[person];
+      savePicks();
+      render();
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    document.getElementById("timelineBtn").addEventListener("click", () => {
+      viewMode = "timeline";
+      document.getElementById("timelineBtn").classList.add("active");
+      document.getElementById("listBtn").classList.remove("active");
+      render();
+    });
+
+    document.getElementById("listBtn").addEventListener("click", () => {
+      viewMode = "list";
+      document.getElementById("listBtn").classList.add("active");
+      document.getElementById("timelineBtn").classList.remove("active");
+      render();
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      if (confirm("Reset all saved Craig/Jess picks?")) {
+        localStorage.removeItem("festivalClashPicksV2");
+        events = originalEvents.map((event, index) => ({
+          ...event,
+          id: index
+        }));
+        render();
+      }
+    });
+
+    filterSelect.addEventListener("change", render);
+    stageSelect.addEventListener("change", render);
+
+    buildTabs();
+    buildStageFilter();
+    render();
+  </script>
+</body>
+</html>
